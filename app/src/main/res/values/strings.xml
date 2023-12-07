@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">MeetingApp</string>
+    <string name="office_location">Office Location</string>
+    <string name="would_you_like_to_have_something_to_eat">Would you like to have something to eat?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="capture_receipts">Capture Receipts</string>
+    <string name="add_photo">Add photo</string>
+    <string name="company">Company</string>
+    <string name="amount">Amount</string>
+    <string name="address">Address</string>
+    <string name="location">Location</string>
+</resources>
