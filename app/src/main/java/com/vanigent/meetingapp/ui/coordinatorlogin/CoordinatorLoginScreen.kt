@@ -159,10 +159,10 @@ fun SearchBar(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = if (isActive) 0.dp else 8.dp),
-        query = searchBarState.searchString,
+        query = searchBarState.searchString ?: "",
         onQueryChange = viewModel::onSearchTextChanged,
         onSearch = {
-            searchResults = viewModel.onSearchAddress(searchBarState.searchString)
+            searchBarState.searchString?.let { searchResults = viewModel.onSearchAddress(it) }
         },
         active = isActive,
         onActiveChange = { activeChange ->
@@ -353,7 +353,7 @@ fun RadioButtons() {
             )
         )
     }
-    radioButtons.forEachIndexed { index, info ->
+    radioButtons.forEachIndexed { _, info ->
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.clickable {

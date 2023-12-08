@@ -1,30 +1,33 @@
 package com.vanigent.meetingapp.ui.coordinatorlogin
 
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.vanigent.meetingapp.util.SampleAddresses
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CoordinatorLoginViewModel @Inject constructor(
-//    private val permissionHandlerUseCase: PermissionHandlerUseCase
-) : ViewModel() {
+class CoordinatorLoginViewModel @Inject constructor() : ViewModel() {
 
     private val _searchBarState = MutableStateFlow(SearchBarState())
     val searchBarState = _searchBarState.asStateFlow()
 
-    init {
-        viewModelScope.launch {
-//            if (!permissionHandlerUseCase.isCameraPermissionGranted()) {
-//                permissionHandlerUseCase.requestCameraPermission()
-//            }
-        }
+    val visiblePermissionDialogQueue = mutableStateListOf<String>()
 
+    fun dismissDialog() {
+        visiblePermissionDialogQueue.removeFirst()
+    }
+
+    fun onPermissionResult(
+        permission: String,
+        isGranted: Boolean
+    ) {
+        if (!isGranted && !visiblePermissionDialogQueue.contains(permission)) {
+            visiblePermissionDialogQueue.add(permission)
+        }
     }
 
     fun onSearchTextChanged(text: String) {
@@ -35,9 +38,7 @@ class CoordinatorLoginViewModel @Inject constructor(
         }
     }
 
-
     fun onSearchAddress(text: String): List<String> {
-
         val searchText = text.trim().lowercase()
 
         return SampleAddresses.addresses.filter { address ->
@@ -56,6 +57,5 @@ class CoordinatorLoginViewModel @Inject constructor(
             )
         }
     }
-
 
 }
