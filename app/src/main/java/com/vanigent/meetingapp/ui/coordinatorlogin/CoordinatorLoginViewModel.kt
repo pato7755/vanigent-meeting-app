@@ -1,7 +1,9 @@
 package com.vanigent.meetingapp.ui.coordinatorlogin
 
+import android.graphics.Bitmap
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
+import com.google.mlkit.vision.text.Text
 import com.vanigent.meetingapp.util.SampleAddresses
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,6 +18,13 @@ class CoordinatorLoginViewModel @Inject constructor() : ViewModel() {
     val searchBarState = _searchBarState.asStateFlow()
 
     val visiblePermissionDialogQueue = mutableStateListOf<String>()
+
+    private val _bitmaps = MutableStateFlow<List<Bitmap>>(emptyList())
+    val bitmaps = _bitmaps.asStateFlow()
+
+    fun onTakePhoto(bitmap: Bitmap) {
+        _bitmaps.value += bitmap
+    }
 
     fun dismissDialog() {
         visiblePermissionDialogQueue.removeFirst()
@@ -56,6 +65,27 @@ class CoordinatorLoginViewModel @Inject constructor() : ViewModel() {
                 searchString = address
             )
         }
+    }
+
+    fun processTextBlock(result: Text) {
+
+        val resultText = result.text
+        for (block in result.textBlocks) {
+            val blockText = block.text
+            val blockCornerPoints = block.cornerPoints
+            val blockFrame = block.boundingBox
+            for (line in block.lines) {
+                val lineText = line.text
+                val lineCornerPoints = line.cornerPoints
+                val lineFrame = line.boundingBox
+                for (element in line.elements) {
+                    val elementText = element.text
+                    val elementCornerPoints = element.cornerPoints
+                    val elementFrame = element.boundingBox
+                }
+            }
+        }
+
     }
 
 }

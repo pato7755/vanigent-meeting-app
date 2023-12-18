@@ -2,6 +2,8 @@
 
 package com.vanigent.meetingapp.ui.coordinatorlogin
 
+import androidx.camera.view.CameraController
+import androidx.camera.view.LifecycleCameraController
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -26,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -95,7 +98,25 @@ fun CoordinatorLogin(
                 .fillMaxWidth()
         ) {
             ImageSection()
+
+//            val context = LocalContext.current
+//            val controller = remember {
+//                LifecycleCameraController(context).apply {
+//                    setEnabledUseCases(
+//                        CameraController.IMAGE_CAPTURE or
+//                                CameraController.VIDEO_CAPTURE
+//                    )
+//                }
+//            }
+//            CameraPreview(
+//                controller = controller,
+//                modifier = Modifier
+////            .fillMaxSize(0.5f)
+//                    .fillMaxWidth(1f)
+//                    .fillMaxHeight(1f)
+//            )
         }
+
 
     }
 
@@ -229,14 +250,32 @@ fun DataEntryForm(
 }
 
 @Composable
-fun ImageSection(
-) {
+fun ImageSection() {
+    var showCameraPreview by remember { mutableStateOf(false) }
+    val receiptString = stringResource(id = R.string.receipt)
+    var receiptCount by remember { mutableStateOf(0) }
+    val extractedText = remember { mutableStateOf("") }
+    var receiptItemList by remember {
+        mutableStateOf<List<ReceiptItem>>(
+            mutableListOf(
+                ReceiptItem(
+                    title = "$receiptString $receiptCount"
+                )
+            )
+        )
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
             .clickable {
+                showCameraPreview = !showCameraPreview
 
+
+//                receiptItemList = receiptItemList + ReceiptItem(
+//                    title = "$receiptString ${receiptCount + 1}"
+//                )
+//                receiptCount++
             },
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
     ) {
@@ -245,48 +284,84 @@ fun ImageSection(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
+        if (showCameraPreview) {
+            CameraStuff(
+                extractedText = extractedText
+            )
+        }
+
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(16.dp),
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .clip(shape = RoundedCornerShape(16.dp))
-                    .background(color = Color.White)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .width(48.dp)
-                        .height(48.dp)
-                        .align(Alignment.Center)
-                        .background(
-                            color = colorResource(R.color.vanigent_light_green),
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.CameraAlt,
-                        tint = Color.White,
-                        contentDescription = null,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
 
-                }
-                Text(
-                    text = stringResource(id = R.string.add_photo),
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(8.dp),
-                    style = MaterialTheme.typography.bodyLarge
-                )
+            items(items = receiptItemList) { item ->
+
+                ReceiptImageItem()
+
             }
+        }
 
+    }
+
+}
+
+@Composable
+fun ShowCamera() {
+    val context = LocalContext.current
+    val controller = remember {
+        LifecycleCameraController(context).apply {
+            setEnabledUseCases(
+                CameraController.IMAGE_CAPTURE or
+                        CameraController.VIDEO_CAPTURE
+            )
         }
     }
 
+
+//    CameraPreview(
+//        controller = controller,
+//        modifier = Modifier
+//            .fillMaxWidth(1f)
+//            .fillMaxHeight(1f)
+//    )
+}
+
+@Composable
+private fun ReceiptImageItem() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(ratio = 1f)
+            .clip(shape = RoundedCornerShape(16.dp))
+            .background(color = Color.White)
+    ) {
+        Box(
+            modifier = Modifier
+                .width(48.dp)
+                .height(48.dp)
+                .align(Alignment.Center)
+                .background(
+                    color = colorResource(R.color.vanigent_light_green),
+                    shape = RoundedCornerShape(8.dp)
+                )
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.CameraAlt,
+                tint = Color.White,
+                contentDescription = null,
+                modifier = Modifier.align(Alignment.Center)
+            )
+
+        }
+        Text(
+            text = stringResource(id = R.string.add_photo),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(8.dp),
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
 }
 
 @Composable
