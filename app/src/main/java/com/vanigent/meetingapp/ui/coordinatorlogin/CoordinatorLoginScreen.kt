@@ -286,7 +286,10 @@ fun ImageSection() {
 
         if (showCameraPreview) {
             CameraStuff(
-                extractedText = extractedText
+                extractedText = extractedText,
+                closeCameraPreview = {
+                    showCameraPreview = false
+                }
             )
         }
 
@@ -306,26 +309,6 @@ fun ImageSection() {
 
 }
 
-@Composable
-fun ShowCamera() {
-    val context = LocalContext.current
-    val controller = remember {
-        LifecycleCameraController(context).apply {
-            setEnabledUseCases(
-                CameraController.IMAGE_CAPTURE or
-                        CameraController.VIDEO_CAPTURE
-            )
-        }
-    }
-
-
-//    CameraPreview(
-//        controller = controller,
-//        modifier = Modifier
-//            .fillMaxWidth(1f)
-//            .fillMaxHeight(1f)
-//    )
-}
 
 @Composable
 private fun ReceiptImageItem() {

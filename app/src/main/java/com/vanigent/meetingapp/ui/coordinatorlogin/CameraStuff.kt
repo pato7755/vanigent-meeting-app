@@ -50,7 +50,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CameraStuff(
-    extractedText: MutableState<String>
+    extractedText: MutableState<String>,
+    closeCameraPreview: () -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -131,7 +132,8 @@ fun CameraStuff(
                             onPhotoTaken = viewModel::onTakePhoto,
                             textRecognizer = textRecognizer,
                             extractedText = extractedText,
-                            context = context
+                            context = context,
+                            closeCameraPreview = closeCameraPreview
                         )
                     }
                 ) {
@@ -150,7 +152,8 @@ private fun takePhoto(
     onPhotoTaken: (Bitmap) -> Unit,
     textRecognizer: TextRecognizer,
     extractedText: MutableState<String>,
-    context: Context
+    context: Context,
+    closeCameraPreview: () -> Unit
 ) {
 
     controller.takePicture(
@@ -174,15 +177,12 @@ private fun takePhoto(
 
                 onPhotoTaken(rotatedBitmap)
 
-//                imageProxy.let {
-//                    ObjectDetectorImageAnalyzer(textRecognizer, extractedText)
-//                        .analyzeCapturedImage(it.image)
-//                }
                 imageProxy.let {
                     TextAnalyzer(textRecognizer)
                         .analyze(it)
                 }
 
+                closeCameraPreview()
 
 
 
