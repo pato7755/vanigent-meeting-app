@@ -2,8 +2,6 @@
 
 package com.vanigent.meetingapp.ui.coordinatorlogin
 
-import androidx.camera.view.CameraController
-import androidx.camera.view.LifecycleCameraController
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,14 +19,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vanigent.meetingapp.R
+import com.vanigent.meetingapp.ui.common.SectionHeader
 import com.vanigent.meetingapp.ui.settings.ToggleableInfo
 import com.vanigent.meetingapp.util.Constants.SEVENTY_PERCENT
 import timber.log.Timber
@@ -63,34 +60,8 @@ fun CoordinatorLogin(
                 ) {
                     DataEntryForm()
 
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        shape = RoundedCornerShape(size = 16.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
-                        colors = CardDefaults.cardColors(
-                            contentColor = colorResource(id = R.color.vanigent_light_green),
-                            containerColor = colorResource(id = R.color.white)
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
-                        ) {
-
-                            extractedTextState.mapOfStrings.forEach { (key, value) ->
-                                println("Key: $key, Value: $value")
-                                ReceiptDetails(
-                                    label = key,
-                                    text = value
-                                )
-                            }
-
-                        }
-
-                    }
+                    if (extractedTextState.receiptNumber > 0)
+                        ReceiptDetailsCard(extractedTextState)
 
                 }
             }
@@ -115,6 +86,46 @@ fun CoordinatorLogin(
     }
 
 
+}
+
+@Composable
+fun ReceiptDetailsCard(
+    extractedTextState: ExtractedTextState
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        shape = RoundedCornerShape(size = 16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
+        colors = CardDefaults.cardColors(
+            contentColor = colorResource(id = R.color.vanigent_light_green),
+            containerColor = colorResource(id = R.color.white)
+        )
+    ) {
+        SectionHeader(
+            title = "${stringResource(id = R.string.receipt)} " +
+                    "${extractedTextState.receiptNumber}"
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+
+
+            extractedTextState.mapOfStrings.forEach { (key, value) ->
+                println("Key: $key, Value: $value")
+                ReceiptDetails(
+                    label = key,
+                    text = value
+                )
+            }
+
+        }
+
+    }
 }
 
 @Composable
@@ -276,7 +287,7 @@ fun ImageSection(
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
     ) {
 
-        SectionHeader()
+        SectionHeader(stringResource(id = R.string.capture_receipts))
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -309,7 +320,7 @@ fun ImageSection(
 
 
 @Composable
-private fun ReceiptImageItem() {
+fun ReceiptImageItem() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -350,6 +361,7 @@ fun ReceiptDetails(
     label: String = "",
     text: String = ""
 ) {
+
     Row {
         Text(
             text = label,
@@ -363,35 +375,6 @@ fun ReceiptDetails(
     }
 }
 
-@Composable
-fun SectionHeader() {
-    var boxWidth by remember { mutableStateOf(0F) }
-    Box(
-        modifier = Modifier
-            .wrapContentHeight()
-            .fillMaxWidth()
-            .onGloballyPositioned { coordinates -> // gets the actual height of the device
-                boxWidth = coordinates.size.width.toFloat()
-            }
-            .background(
-                Brush.verticalGradient( // brush is used for various kinds of gradients
-                    colors = listOf(
-                        colorResource(id = R.color.vanigent_dark_green),
-                        colorResource(id = R.color.vanigent_light_green),
-
-                        ),
-                    startY = SEVENTY_PERCENT * boxWidth
-                )
-            )
-    ) {
-        Text(
-            text = stringResource(id = R.string.capture_receipts),
-            color = Color.White,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(24.dp)
-        )
-    }
-}
 
 @Composable
 fun RadioButtons() {

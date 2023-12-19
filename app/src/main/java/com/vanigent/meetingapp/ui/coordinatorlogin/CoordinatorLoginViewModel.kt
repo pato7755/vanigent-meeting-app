@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.ViewModel
-import com.google.mlkit.vision.text.Text
 import com.vanigent.meetingapp.util.SampleAddresses
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,8 +23,14 @@ class CoordinatorLoginViewModel @Inject constructor() : ViewModel() {
     private val _bitmaps = MutableStateFlow<List<Bitmap>>(emptyList())
     val bitmaps = _bitmaps.asStateFlow()
 
-    private val _recognizedText = MutableStateFlow(RecognizedText("Receipt 1", mutableStateMapOf()))
-    val recognizedText = _recognizedText.asStateFlow()
+    private val _extractedTextState = MutableStateFlow(
+        ExtractedTextState(
+            receiptNumber = 0,
+            mapOfStrings = mutableStateMapOf()
+        )
+    )
+    val recognizedText = _extractedTextState.asStateFlow()
+
 
     fun onTakePhoto(bitmap: Bitmap) {
         _bitmaps.value += bitmap
@@ -78,8 +83,10 @@ class CoordinatorLoginViewModel @Inject constructor() : ViewModel() {
 
     fun updateReceiptDetails(extractedText: MutableMap<String, String>) {
         Timber.d("extractedText VM - $extractedText")
-        _recognizedText.update { state ->
+        _extractedTextState.update { state ->
+            Timber.d("state.receiptNumber - ${state.receiptNumber}")
             state.copy(
+                receiptNumber = state.receiptNumber + 1,
                 mapOfStrings = extractedText
             )
         }
