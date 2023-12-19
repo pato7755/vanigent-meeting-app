@@ -56,11 +56,15 @@ class CoordinatorLoginViewModel @Inject constructor() : ViewModel() {
         val searchText = text.trim().lowercase()
 
         return SampleAddresses.addresses.filter { address ->
+            val trimmedPhysicianName = address.physicianName.trim().lowercase()
             val trimmedLineOne = address.lineOne.trim().lowercase()
             val trimmedCity = address.city.trim().lowercase()
             val trimmedState = address.state.trim().lowercase()
 
-            searchText in trimmedLineOne || searchText in trimmedCity || searchText in trimmedState
+            searchText in trimmedPhysicianName
+                    || searchText in trimmedLineOne
+                    || searchText in trimmedCity
+                    || searchText in trimmedState
         }.map { it.lineOne }
     }
 
