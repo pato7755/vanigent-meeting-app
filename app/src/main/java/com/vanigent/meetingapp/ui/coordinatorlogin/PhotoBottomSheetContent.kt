@@ -22,33 +22,33 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PhotoBottomSheetContent(
-    bitmaps: List<Bitmap>,
+//    bitmaps: List<Bitmap>,
     modifier: Modifier = Modifier
 ) {
-    if(bitmaps.isEmpty()) {
-        Box(
-            modifier = modifier
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("There are no photos yet")
-        }
-    } else {
-        LazyVerticalStaggeredGrid(
-            columns = StaggeredGridCells.Fixed(2),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalItemSpacing = 16.dp,
-            contentPadding = PaddingValues(16.dp),
-            modifier = modifier
-        ) {
-            items(bitmaps) { bitmap ->
-                Image(
-                    bitmap = bitmap.asImageBitmap(),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                )
-            }
-        }
-    }
+//    if(bitmaps.isEmpty()) {
+//        Box(
+//            modifier = modifier
+//                .padding(16.dp),
+//            contentAlignment = Alignment.Center
+//        ) {
+//            Text("There are no photos yet")
+//        }
+//    } else {
+//        LazyVerticalStaggeredGrid(
+//            columns = StaggeredGridCells.Fixed(2),
+//            horizontalArrangement = Arrangement.spacedBy(16.dp),
+//            verticalItemSpacing = 16.dp,
+//            contentPadding = PaddingValues(16.dp),
+//            modifier = modifier
+//        ) {
+//            items(bitmaps) { bitmap ->
+//                Image(
+//                    bitmap = bitmap.asImageBitmap(),
+//                    contentDescription = null,
+//                    modifier = Modifier
+//                        .clip(RoundedCornerShape(10.dp))
+//                )
+//            }
+//        }
+//    }
 }

@@ -46,11 +46,13 @@ import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.TextRecognizer
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CameraStuff(
-    extractedText: MutableState<String>,
+    extractedText: MutableMap<String, String>,
+    onReceiptDetailsUpdated: (MutableMap<String, String>) -> Unit,
     closeCameraPreview: () -> Unit
 ) {
     val context = LocalContext.current
@@ -64,16 +66,14 @@ fun CameraStuff(
             )
         }
     }
-    val viewModel = viewModel<CoordinatorLoginViewModel>()
-    val bitmaps by viewModel.bitmaps.collectAsState()
-    val textRecognizer = remember { TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS) }
+    val textRecognizer =
+        remember { TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS) }
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetPeekHeight = 0.dp,
         sheetContent = {
             PhotoBottomSheetContent(
-                bitmaps = bitmaps,
                 modifier = Modifier
                     .fillMaxWidth()
             )
@@ -129,11 +129,11 @@ fun CameraStuff(
                     onClick = {
                         takePhoto(
                             controller = controller,
-                            onPhotoTaken = viewModel::onTakePhoto,
                             textRecognizer = textRecognizer,
                             extractedText = extractedText,
                             context = context,
-                            closeCameraPreview = closeCameraPreview
+                            closeCameraPreview = closeCameraPreview,
+                            onReceiptDetailsUpdated = onReceiptDetailsUpdated
                         )
                     }
                 ) {
@@ -149,48 +149,49 @@ fun CameraStuff(
 
 private fun takePhoto(
     controller: LifecycleCameraController,
-    onPhotoTaken: (Bitmap) -> Unit,
     textRecognizer: TextRecognizer,
-    extractedText: MutableState<String>,
+    extractedText: MutableMap<String, String>,
     context: Context,
-    closeCameraPreview: () -> Unit
+    closeCameraPreview: () -> Unit,
+    onReceiptDetailsUpdated: (MutableMap<String, String>) -> Unit
 ) {
 
     controller.takePicture(
         ContextCompat.getMainExecutor(context),
         object : OnImageCapturedCallback() {
-            @androidx.annotation.OptIn(ExperimentalGetImage::class) override fun onCaptureSuccess(imageProxy: ImageProxy) {
+            @androidx.annotation.OptIn(ExperimentalGetImage::class)
+            override fun onCaptureSuccess(imageProxy: ImageProxy) {
                 super.onCaptureSuccess(imageProxy)
 
                 val matrix = Matrix().apply {
                     postRotate(imageProxy.imageInfo.rotationDegrees.toFloat())
                 }
-                val rotatedBitmap = Bitmap.createBitmap(
-                    imageProxy.toBitmap(),
-                    0,
-                    0,
-                    imageProxy.width,
-                    imageProxy.height,
-                    matrix,
-                    true
-                )
-
-                onPhotoTaken(rotatedBitmap)
+//                val rotatedBitmap = Bitmap.createBitmap(
+//                    imageProxy.toBitmap(),
+//                    0,
+//                    0,
+//                    imageProxy.width,
+//                    imageProxy.height,
+//                    matrix,
+//                    true
+//                )
 
                 imageProxy.let {
-                    TextAnalyzer(textRecognizer)
-                        .analyze(it)
+                    TextAnalyzer(
+                        textRecognizer = textRecognizer,
+                        extractedText = extractedText
+                    ).analyze(it)
+
+                    onReceiptDetailsUpdated(extractedText)
                 }
 
                 closeCameraPreview()
-
-
 
             }
 
             override fun onError(exception: ImageCaptureException) {
                 super.onError(exception)
-                Log.e("Camera", "Couldn't take photo: ", exception)
+                Timber.e("Camera", "Couldn't take photo: ", exception)
             }
         }
     )

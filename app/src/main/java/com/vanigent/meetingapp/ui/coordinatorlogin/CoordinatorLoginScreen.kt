@@ -38,55 +38,62 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vanigent.meetingapp.R
 import com.vanigent.meetingapp.ui.settings.ToggleableInfo
 import com.vanigent.meetingapp.util.Constants.SEVENTY_PERCENT
+import timber.log.Timber
 
 @Composable
 fun CoordinatorLogin(
+    viewModel: CoordinatorLoginViewModel = hiltViewModel()
 ) {
+    val extractedTextState by viewModel.recognizedText.collectAsStateWithLifecycle()
+
     Row(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
+        LazyColumn(
+            modifier = Modifier.weight(1f)
         ) {
-            DataEntryForm()
 
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                shape = RoundedCornerShape(size = 16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
-                colors = CardDefaults.cardColors(
-                    contentColor = colorResource(id = R.color.vanigent_light_green),
-                    containerColor = colorResource(id = R.color.white)
-                )
-            ) {
+            item {
                 Column(
                     modifier = Modifier
+                        .weight(1f)
                         .fillMaxWidth()
-                        .padding(16.dp)
                 ) {
+                    DataEntryForm()
 
-                    ReceiptDetails(
-                        stringResource(id = R.string.company),
-                        "Company"
-                    )
-                    ReceiptDetails(
-                        stringResource(id = R.string.address),
-                        "Address"
-                    )
-                    ReceiptDetails(
-                        stringResource(id = R.string.amount),
-                        "Amount"
-                    )
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        shape = RoundedCornerShape(size = 16.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
+                        colors = CardDefaults.cardColors(
+                            contentColor = colorResource(id = R.color.vanigent_light_green),
+                            containerColor = colorResource(id = R.color.white)
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+
+                            extractedTextState.mapOfStrings.forEach { (key, value) ->
+                                println("Key: $key, Value: $value")
+                                ReceiptDetails(
+                                    label = key,
+                                    text = value
+                                )
+                            }
+
+                        }
+
+                    }
+
                 }
-
             }
-
 
         }
 
@@ -97,24 +104,11 @@ fun CoordinatorLogin(
                 .weight(SEVENTY_PERCENT)
                 .fillMaxWidth()
         ) {
-            ImageSection()
+            ImageSection(
+                extractedText = extractedTextState.mapOfStrings,
+                onReceiptDetailsUpdated = viewModel::updateReceiptDetails
+            )
 
-//            val context = LocalContext.current
-//            val controller = remember {
-//                LifecycleCameraController(context).apply {
-//                    setEnabledUseCases(
-//                        CameraController.IMAGE_CAPTURE or
-//                                CameraController.VIDEO_CAPTURE
-//                    )
-//                }
-//            }
-//            CameraPreview(
-//                controller = controller,
-//                modifier = Modifier
-////            .fillMaxSize(0.5f)
-//                    .fillMaxWidth(1f)
-//                    .fillMaxHeight(1f)
-//            )
         }
 
 
@@ -250,11 +244,13 @@ fun DataEntryForm(
 }
 
 @Composable
-fun ImageSection() {
+fun ImageSection(
+    extractedText: MutableMap<String, String>,
+    onReceiptDetailsUpdated: (MutableMap<String, String>) -> Unit
+) {
     var showCameraPreview by remember { mutableStateOf(false) }
     val receiptString = stringResource(id = R.string.receipt)
     var receiptCount by remember { mutableStateOf(0) }
-    val extractedText = remember { mutableStateOf("") }
     var receiptItemList by remember {
         mutableStateOf<List<ReceiptItem>>(
             mutableListOf(
@@ -285,11 +281,13 @@ fun ImageSection() {
         Spacer(modifier = Modifier.height(8.dp))
 
         if (showCameraPreview) {
+            Timber.d("extractedText ImageSection - $extractedText")
             CameraStuff(
                 extractedText = extractedText,
                 closeCameraPreview = {
                     showCameraPreview = false
-                }
+                },
+                onReceiptDetailsUpdated = onReceiptDetailsUpdated
             )
         }
 
