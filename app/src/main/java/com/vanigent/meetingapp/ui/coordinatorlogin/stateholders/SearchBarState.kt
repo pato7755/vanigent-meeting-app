@@ -1,4 +1,4 @@
-package com.vanigent.meetingapp.ui.coordinatorlogin
+package com.vanigent.meetingapp.ui.coordinatorlogin.stateholders
 
 import com.vanigent.meetingapp.util.Address
 

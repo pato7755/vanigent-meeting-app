@@ -4,6 +4,10 @@ import android.graphics.Bitmap
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.ViewModel
+import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.BitmapState
+import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.ExtractedTextState
+import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.ReceiptItem
+import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.SearchBarState
 import com.vanigent.meetingapp.util.SampleAddresses
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,21 +24,29 @@ class CoordinatorLoginViewModel @Inject constructor() : ViewModel() {
 
     val visiblePermissionDialogQueue = mutableStateListOf<String>()
 
-    private val _bitmaps = MutableStateFlow<List<Bitmap>>(emptyList())
-    val bitmaps = _bitmaps.asStateFlow()
+    private val _bitmapState = MutableStateFlow(BitmapState())
+    val bitmapState = _bitmapState.asStateFlow()
 
     private val _extractedTextState = MutableStateFlow(
         ExtractedTextState(
             receiptNumber = 0,
-            mapOfStrings = mutableStateMapOf()
+            mapOfStrings = mutableStateMapOf(),
+            bitmap = null,
+            receiptItems = emptyList()
         )
     )
     val recognizedText = _extractedTextState.asStateFlow()
 
 
-    fun onTakePhoto(bitmap: Bitmap) {
-        _bitmaps.value += bitmap
-    }
+//    fun updateBitmapHolder(bitmap: Bitmap?) {
+//        bitmap?.let {
+//            _bitmapState.update { state ->
+//                state.copy(
+//                    bitmap = it
+//                )
+//            }
+//        }
+//    }
 
     fun dismissDialog() {
         visiblePermissionDialogQueue.removeFirst()
@@ -81,13 +93,19 @@ class CoordinatorLoginViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    fun updateReceiptDetails(extractedText: MutableMap<String, String>) {
+    fun updateReceiptDetails(extractedText: MutableMap<String, String>, bitmap: Bitmap) {
         Timber.d("extractedText VM - $extractedText")
         _extractedTextState.update { state ->
             Timber.d("state.receiptNumber - ${state.receiptNumber}")
             state.copy(
                 receiptNumber = state.receiptNumber + 1,
-                mapOfStrings = extractedText
+                mapOfStrings = extractedText,
+                bitmap = bitmap,
+                receiptItems = state.receiptItems + ReceiptItem(
+                    title = "Receipt ${state.receiptNumber + 1}",
+                    mapOfStrings = extractedText,
+                    bitmap = bitmap
+                )
             )
         }
     }

@@ -20,7 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vanigent.meetingapp.ui.common.CameraPermissionTextProvider
 import com.vanigent.meetingapp.ui.common.PermissionDialog
-import com.vanigent.meetingapp.ui.coordinatorlogin.CoordinatorLogin
+import com.vanigent.meetingapp.ui.coordinatorlogin.CoordinatorLoginScreen
 import com.vanigent.meetingapp.ui.coordinatorlogin.CoordinatorLoginViewModel
 import com.vanigent.meetingapp.ui.theme.MeetingAppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
 
-                    CoordinatorLogin()
+                    CoordinatorLoginScreen()
 
                     RequestForPermissions()
                 }

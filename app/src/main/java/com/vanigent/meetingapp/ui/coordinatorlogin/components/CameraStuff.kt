@@ -3,7 +3,6 @@ package com.vanigent.meetingapp.ui.coordinatorlogin
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Matrix
-import android.util.Log
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageCapture.OnImageCapturedCallback
@@ -29,9 +28,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -41,10 +37,10 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.TextRecognizer
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import com.vanigent.meetingapp.ui.coordinatorlogin.components.PhotoBottomSheetContent
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -52,8 +48,8 @@ import timber.log.Timber
 @Composable
 fun CameraStuff(
     extractedText: MutableMap<String, String>,
-    onReceiptDetailsUpdated: (MutableMap<String, String>) -> Unit,
-    closeCameraPreview: () -> Unit
+    onReceiptDetailsUpdated: (MutableMap<String, String>, Bitmap) -> Unit,
+    closeCameraPreview: (Bitmap?) -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -152,8 +148,8 @@ private fun takePhoto(
     textRecognizer: TextRecognizer,
     extractedText: MutableMap<String, String>,
     context: Context,
-    closeCameraPreview: () -> Unit,
-    onReceiptDetailsUpdated: (MutableMap<String, String>) -> Unit
+    closeCameraPreview: (Bitmap?) -> Unit,
+    onReceiptDetailsUpdated: (MutableMap<String, String>, Bitmap) -> Unit
 ) {
 
     controller.takePicture(
@@ -166,15 +162,15 @@ private fun takePhoto(
                 val matrix = Matrix().apply {
                     postRotate(imageProxy.imageInfo.rotationDegrees.toFloat())
                 }
-//                val rotatedBitmap = Bitmap.createBitmap(
-//                    imageProxy.toBitmap(),
-//                    0,
-//                    0,
-//                    imageProxy.width,
-//                    imageProxy.height,
-//                    matrix,
-//                    true
-//                )
+                val rotatedBitmap = Bitmap.createBitmap(
+                    imageProxy.toBitmap(),
+                    0,
+                    0,
+                    imageProxy.width,
+                    imageProxy.height,
+                    matrix,
+                    true
+                )
 
                 imageProxy.let {
                     TextAnalyzer(
@@ -182,10 +178,10 @@ private fun takePhoto(
                         extractedText = extractedText
                     ).analyze(it)
 
-                    onReceiptDetailsUpdated(extractedText)
+                    onReceiptDetailsUpdated(extractedText, rotatedBitmap)
                 }
 
-                closeCameraPreview()
+                closeCameraPreview(rotatedBitmap)
 
             }
 

@@ -1,4 +1,4 @@
-package com.vanigent.meetingapp.ui.coordinatorlogin
+package com.vanigent.meetingapp.ui.coordinatorlogin.components
 
 import android.graphics.Bitmap
 import androidx.compose.foundation.ExperimentalFoundationApi

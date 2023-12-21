@@ -2,6 +2,8 @@
 
 package com.vanigent.meetingapp.ui.coordinatorlogin
 
+import android.graphics.Bitmap
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,12 +21,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,12 +35,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vanigent.meetingapp.R
 import com.vanigent.meetingapp.ui.common.SectionHeader
+import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.ReceiptItem
 import com.vanigent.meetingapp.ui.settings.ToggleableInfo
 import com.vanigent.meetingapp.util.Constants.SEVENTY_PERCENT
 import timber.log.Timber
 
 @Composable
-fun CoordinatorLogin(
+fun CoordinatorLoginScreen(
     viewModel: CoordinatorLoginViewModel = hiltViewModel()
 ) {
     val extractedTextState by viewModel.recognizedText.collectAsStateWithLifecycle()
@@ -60,12 +63,17 @@ fun CoordinatorLogin(
                 ) {
                     DataEntryForm()
 
-                    if (extractedTextState.receiptNumber > 0)
-                        ReceiptDetailsCard(extractedTextState)
+                    extractedTextState.receiptItems.forEachIndexed { index, receiptItem ->
+                        ReceiptDetailsCard(
+                            receiptItem = receiptItem,
+                        )
+                        if (index < extractedTextState.receiptItems.size - 1) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    }
 
                 }
             }
-
         }
 
         Spacer(modifier = Modifier.width(8.dp))
@@ -75,26 +83,23 @@ fun CoordinatorLogin(
                 .weight(SEVENTY_PERCENT)
                 .fillMaxWidth()
         ) {
-            ImageSection(
+            ReceiptImageSection(
                 extractedText = extractedTextState.mapOfStrings,
                 onReceiptDetailsUpdated = viewModel::updateReceiptDetails
             )
-
         }
-
-
     }
-
-
 }
+
 
 @Composable
 fun ReceiptDetailsCard(
-    extractedTextState: ExtractedTextState
+    receiptItem: ReceiptItem
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .wrapContentHeight()
             .padding(8.dp),
         shape = RoundedCornerShape(size = 16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
@@ -104,8 +109,7 @@ fun ReceiptDetailsCard(
         )
     ) {
         SectionHeader(
-            title = "${stringResource(id = R.string.receipt)} " +
-                    "${extractedTextState.receiptNumber}"
+            title = receiptItem.title
         )
 
         Column(
@@ -113,18 +117,30 @@ fun ReceiptDetailsCard(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-
-
-            extractedTextState.mapOfStrings.forEach { (key, value) ->
-                println("Key: $key, Value: $value")
-                ReceiptDetails(
-                    label = key,
-                    text = value
-                )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp)
+            ) {
+                receiptItem.bitmap?.asImageBitmap()?.let {
+                    Image(
+                        bitmap = it,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.White.copy(alpha = 0.7f))
+                            .padding(16.dp)
+                    )
+                }
             }
-
         }
-
+        receiptItem.mapOfStrings.forEach { (key, value) ->
+            println("Key: $key, Value: $value")
+            ReceiptDetails(
+                label = key,
+                text = value
+            )
+        }
     }
 }
 
@@ -136,7 +152,6 @@ fun SearchResults(
     // Display the search results here
     LazyColumn {
         items(addresses) { address ->
-            // Customize the UI for each search result item
             Row(
                 modifier = Modifier.clickable {
                     onItemSelected(address)
@@ -255,34 +270,18 @@ fun DataEntryForm(
 }
 
 @Composable
-fun ImageSection(
+fun ReceiptImageSection(
     extractedText: MutableMap<String, String>,
-    onReceiptDetailsUpdated: (MutableMap<String, String>) -> Unit
+    onReceiptDetailsUpdated: (MutableMap<String, String>, Bitmap) -> Unit
 ) {
     var showCameraPreview by remember { mutableStateOf(false) }
-    val receiptString = stringResource(id = R.string.receipt)
-    var receiptCount by remember { mutableStateOf(0) }
-    var receiptItemList by remember {
-        mutableStateOf<List<ReceiptItem>>(
-            mutableListOf(
-                ReceiptItem(
-                    title = "$receiptString $receiptCount"
-                )
-            )
-        )
-    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
             .clickable {
                 showCameraPreview = !showCameraPreview
-
-
-//                receiptItemList = receiptItemList + ReceiptItem(
-//                    title = "$receiptString ${receiptCount + 1}"
-//                )
-//                receiptCount++
             },
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
     ) {
@@ -293,26 +292,17 @@ fun ImageSection(
 
         if (showCameraPreview) {
             Timber.d("extractedText ImageSection - $extractedText")
+
             CameraStuff(
                 extractedText = extractedText,
-                closeCameraPreview = {
+                closeCameraPreview = { _ ->
                     showCameraPreview = false
                 },
                 onReceiptDetailsUpdated = onReceiptDetailsUpdated
             )
         }
 
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(16.dp),
-        ) {
-
-            items(items = receiptItemList) { item ->
-
-                ReceiptImageItem()
-
-            }
-        }
+        ReceiptImageItem()
 
     }
 
@@ -321,47 +311,56 @@ fun ImageSection(
 
 @Composable
 fun ReceiptImageItem() {
-    Box(
+
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(ratio = 1f)
-            .clip(shape = RoundedCornerShape(16.dp))
-            .background(color = Color.White)
+            .padding(8.dp)
     ) {
+
         Box(
             modifier = Modifier
-                .width(48.dp)
-                .height(48.dp)
-                .align(Alignment.Center)
-                .background(
-                    color = colorResource(R.color.vanigent_light_green),
-                    shape = RoundedCornerShape(8.dp)
-                )
+                .fillMaxWidth()
+                .height(250.dp)
+                .clip(shape = RoundedCornerShape(16.dp))
+                .background(color = Color.White)
         ) {
-            Icon(
-                imageVector = Icons.Outlined.CameraAlt,
-                tint = Color.White,
-                contentDescription = null,
-                modifier = Modifier.align(Alignment.Center)
-            )
+            Box(
+                modifier = Modifier
+                    .width(48.dp)
+                    .height(48.dp)
+                    .align(Alignment.Center)
+                    .background(
+                        color = colorResource(R.color.vanigent_light_green),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.CameraAlt,
+                    tint = Color.White,
+                    contentDescription = null,
+                    modifier = Modifier.align(Alignment.Center)
+                )
 
+            }
+            Text(
+                text = stringResource(id = R.string.add_photo),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(8.dp),
+                style = MaterialTheme.typography.bodyLarge
+            )
         }
-        Text(
-            text = stringResource(id = R.string.add_photo),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(8.dp),
-            style = MaterialTheme.typography.bodyLarge
-        )
     }
+
 }
+
 
 @Composable
 fun ReceiptDetails(
     label: String = "",
     text: String = ""
 ) {
-
     Row {
         Text(
             text = label,
@@ -426,7 +425,7 @@ fun RadioButtons() {
     heightDp = 480
 )
 fun MediumSizedTablet() {
-    CoordinatorLogin()
+    CoordinatorLoginScreen()
 }
 
 @Composable
@@ -436,6 +435,6 @@ fun MediumSizedTablet() {
     heightDp = 840
 )
 fun ExpandedSizedTablet() {
-    CoordinatorLogin()
+    CoordinatorLoginScreen()
 }
 
