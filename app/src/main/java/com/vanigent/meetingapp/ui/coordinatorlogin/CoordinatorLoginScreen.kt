@@ -51,11 +51,11 @@ fun CoordinatorLoginScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        LazyColumn(
-            modifier = Modifier.weight(1f)
-        ) {
+//        LazyColumn(
+//            modifier = Modifier.weight(1f)
+//        ) {
 
-            item {
+//            item {
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -75,8 +75,8 @@ fun CoordinatorLoginScreen(
                     }
 
                 }
-            }
-        }
+//            }
+//        }
 
         Spacer(modifier = Modifier.width(8.dp))
 
