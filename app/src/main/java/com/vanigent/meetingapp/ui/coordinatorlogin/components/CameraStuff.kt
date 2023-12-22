@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.Matrix
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
+import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture.OnImageCapturedCallback
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
@@ -37,12 +38,15 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.TextRecognizer
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.vanigent.meetingapp.ui.coordinatorlogin.components.PhotoBottomSheetContent
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
+//private var isPhotoCaptured = false // Add this flag at the beginning of the file
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,6 +55,7 @@ fun CameraStuff(
     onReceiptDetailsUpdated: (MutableMap<String, String>, Bitmap) -> Unit,
     closeCameraPreview: (Bitmap?) -> Unit
 ) {
+    Timber.e("Camera stuff")
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberBottomSheetScaffoldState()
@@ -62,8 +67,34 @@ fun CameraStuff(
             )
         }
     }
-    val textRecognizer =
-        remember { TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS) }
+
+    // TextRecognitionCallback implementation
+//    val textRecognitionCallback = remember {
+//        object : TextRecognitionCallback {
+//
+//
+//
+//        }
+//    }
+
+    val textRecognizer = remember {
+        TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+    }
+
+//    val textAnalyzer = remember {
+//        TextAnalyzer(textRecognizer = textRecognizer, callback = textRecognitionCallback)
+//    }
+
+    // Create a new ImageAnalysis instance
+//    val imageAnalysis = remember {
+//        ImageAnalysis.Builder()
+//            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+//            .build()
+//    }
+
+    // Set the ImageAnalysis analyzer
+//    imageAnalysis.setAnalyzer(Dispatchers.Main, textAnalyzer::analyze)
+
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
@@ -129,7 +160,8 @@ fun CameraStuff(
                             extractedText = extractedText,
                             context = context,
                             closeCameraPreview = closeCameraPreview,
-                            onReceiptDetailsUpdated = onReceiptDetailsUpdated
+                            onReceiptDetailsUpdated = onReceiptDetailsUpdated,
+//                            textRecognitionCallback = textRecognitionCallback
                         )
                     }
                 ) {
@@ -149,8 +181,11 @@ private fun takePhoto(
     extractedText: MutableMap<String, String>,
     context: Context,
     closeCameraPreview: (Bitmap?) -> Unit,
-    onReceiptDetailsUpdated: (MutableMap<String, String>, Bitmap) -> Unit
+    onReceiptDetailsUpdated: (MutableMap<String, String>, Bitmap) -> Unit,
+//    textRecognitionCallback: TextRecognitionCallback
 ) {
+
+
 
     controller.takePicture(
         ContextCompat.getMainExecutor(context),
@@ -175,10 +210,113 @@ private fun takePhoto(
                 imageProxy.let {
                     TextAnalyzer(
                         textRecognizer = textRecognizer,
-                        extractedText = extractedText
+//                        extractedText = extractedText
+                        callback = object : TextRecognitionCallback {
+                            override fun onSuccess(visionText: Text) {
+//                                if (isPhotoCaptured) {
+//                                    Timber.e("Photo has already been captured. Ignoring.")
+//                                    return
+//                                }
+//                                Timber.e("Photo hasn't been captured. Continuing.")
+//                                isPhotoCaptured = true // Set the flag to true to prevent further calls
+
+                                // Handle successful recognition
+                                // Extracted text is available here
+                                Timber.e("extractedText cameraStuff")
+//                                extractedText.clear()
+                                visionText.let { res ->
+
+                                    if (res.text.isBlank()) {
+                                        Timber.e("Could not read receipt")
+                                    } else {
+                                        val firstBlock = res.textBlocks.firstOrNull()?.text.toString()
+                                        val vendorName = validateVendorName(firstBlock)
+                                        Timber.d("vendorName - $vendorName")
+                                        extractedText["VENDOR NAME"] = vendorName
+
+                                        for (block in res.textBlocks) {
+                                            val blockText = block.text
+
+                                            Timber.d("block - $blockText")
+
+                                            val potentialAmountLabels = listOf("TOTAL", "AMOUNT")
+
+
+                                            // Check for specific keywords
+                                            if (blockText.contains("TOTAL", ignoreCase = true)) {
+                                                // Extract subtotal from the current block
+                                                extractSubtotalFromBlock(block)
+
+                                                // Look for nearby lines for subtotal
+                                                val nearbyLines = findNearbyLines(res, block)
+                                                for ((index, line) in nearbyLines.withIndex()) {
+                                                    // Extract every second value from the nearby lines
+                                                    if (index % 2 == 1) {
+                                                        val subtotalFromLine = extractSubtotalFromLine(line)
+                                                        extractedText["TOTAL"] = subtotalFromLine
+                                                    }
+                                                }
+                                            } else if (blockText.contains("ADDRESS", ignoreCase = true)) {
+                                                extractSubtotalFromBlock(block)
+
+                                                // Look for nearby lines for subtotal
+                                                val nearbyLines = findNearbyLines(res, block)
+                                                for ((index, line) in nearbyLines.withIndex()) {
+                                                    // Extract every second value from the nearby lines
+                                                    if (index % 2 == 1) {
+                                                        val subtotalFromLine = extractSubtotalFromLine(line)
+                                                        extractedText["ADDRESS"] = subtotalFromLine
+                                                    }
+                                                }
+                                            } else if (blockText.contains("CASH", ignoreCase = true)) {
+                                                // Extract subtotal from the current block
+                                                extractSubtotalFromBlock(block)
+
+                                                // Look for nearby lines for subtotal
+                                                val nearbyLines = findNearbyLines(res, block)
+                                                for ((index, line) in nearbyLines.withIndex()) {
+                                                    // Extract every second value from the nearby lines
+                                                    if (index % 2 == 1) {
+                                                        val subtotalFromLine = extractSubtotalFromLine(line)
+                                                        extractedText["CASH"] = subtotalFromLine
+                                                    }
+                                                }
+                                            }
+                                            Timber.d("blockText - $blockText")
+                                        }
+                                    }
+
+                                    Timber.e("extractedText.isEmpty() - ${extractedText.isEmpty()}")
+                                    extractedText.map { text ->
+                                        Timber.e("\n ${text.key} - ${text.value}")
+                                    }
+
+                                    // Update extractedText here
+
+                                    extractedText.putAll(extractedText)
+
+                                    // Call onReceiptDetailsUpdated with rotatedBitmap
+                                    onReceiptDetailsUpdated(extractedText, rotatedBitmap)
+
+
+
+                                }
+                            }
+
+                            override fun onFailure(exception: Exception) {
+                                // Handle recognition failure
+                                Timber.e("visionText error - ${exception.message}")
+                            }
+                        }
+
+
                     ).analyze(it)
 
-                    onReceiptDetailsUpdated(extractedText, rotatedBitmap)
+//                    Timber.e("extractedText cameraStuff")
+//                    extractedText.map {text ->
+//                        Timber.e("\n ${text.key} - ${text.value}")
+//                    }
+//                    onReceiptDetailsUpdated(extractedText, rotatedBitmap)
                 }
 
                 closeCameraPreview(rotatedBitmap)
@@ -227,3 +365,54 @@ fun FullScreenCameraPreview(
     )
 }
 
+private fun findNearbyLines(visionText: Text, targetBlock: Text.TextBlock): List<Text.Line> {
+    val nearbyLines = mutableListOf<Text.Line>()
+
+    val targetBoundingText = targetBlock.boundingBox
+
+    for (block in visionText.textBlocks) {
+        for (line in block.lines) {
+            val lineBoundingText = line.boundingBox
+
+            if (lineBoundingText != null && targetBoundingText != null) {
+
+                if ((lineBoundingText.bottom >= targetBoundingText.top)
+                    && (lineBoundingText.top <= targetBoundingText.bottom)
+                ) {
+                    nearbyLines.add(line)
+                }
+            }
+        }
+    }
+
+    return nearbyLines
+}
+
+private fun extractSubtotalFromBlock(block: Text.TextBlock) {
+    // Implement logic to extract subtotal information from the block
+    val subtotalText = block.text
+    Timber.d("Found Subtotal in Block: $subtotalText")
+    // Add your logic to extract and handle the subtotal value
+}
+
+private fun extractSubtotalFromLine(line: Text.Line): String {
+    // Implement logic to extract subtotal information from the line
+    val subtotalText = line.text
+    Timber.d("Found Subtotal in Line: $subtotalText")
+    // Add your logic to extract and handle the subtotal value
+    return subtotalText
+}
+
+private fun extractTaxExclusiveTotal(block: Text.TextBlock) {
+    // Implement logic to extract tax-exclusive total information from the block
+    val taxExclusiveTotalText = block.text
+    Timber.d("Found Tax Exclusive Total: $taxExclusiveTotalText")
+    // Add your logic to extract and handle the tax-exclusive total value
+}
+
+private fun validateVendorName(companyName: String?): String {
+    return if (!companyName.isNullOrBlank()) {
+        companyName.replace("RECEIPT", "", true)
+    } else
+        ""
+}

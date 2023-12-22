@@ -44,7 +44,7 @@ import timber.log.Timber
 fun CoordinatorLoginScreen(
     viewModel: CoordinatorLoginViewModel = hiltViewModel()
 ) {
-    val extractedTextState by viewModel.recognizedText.collectAsStateWithLifecycle()
+    val extractedTextState by viewModel.extractedTextState.collectAsStateWithLifecycle()
 
     Row(
         modifier = Modifier
@@ -63,7 +63,9 @@ fun CoordinatorLoginScreen(
                 ) {
                     DataEntryForm()
 
+                    Timber.e("extractedTextState.receiptItems - ${extractedTextState.receiptItems.size}")
                     extractedTextState.receiptItems.forEachIndexed { index, receiptItem ->
+                        Timber.e("${receiptItem.mapOfStrings}")
                         ReceiptDetailsCard(
                             receiptItem = receiptItem,
                         )
@@ -83,10 +85,12 @@ fun CoordinatorLoginScreen(
                 .weight(SEVENTY_PERCENT)
                 .fillMaxWidth()
         ) {
+            Timber.e("Before calling updateReceiptDetails")
             ReceiptImageSection(
                 extractedText = extractedTextState.mapOfStrings,
                 onReceiptDetailsUpdated = viewModel::updateReceiptDetails
             )
+            Timber.e("After calling updateReceiptDetails")
         }
     }
 }
@@ -141,6 +145,7 @@ fun ReceiptDetailsCard(
                 text = value
             )
         }
+
     }
 }
 
@@ -291,14 +296,13 @@ fun ReceiptImageSection(
         Spacer(modifier = Modifier.height(8.dp))
 
         if (showCameraPreview) {
-            Timber.d("extractedText ImageSection - $extractedText")
 
             CameraStuff(
                 extractedText = extractedText,
+                onReceiptDetailsUpdated = onReceiptDetailsUpdated,
                 closeCameraPreview = { _ ->
                     showCameraPreview = false
-                },
-                onReceiptDetailsUpdated = onReceiptDetailsUpdated
+                }
             )
         }
 

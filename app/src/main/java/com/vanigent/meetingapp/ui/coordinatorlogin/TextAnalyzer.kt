@@ -9,9 +9,15 @@ import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognizer
 import timber.log.Timber
 
+interface TextRecognitionCallback {
+    fun onSuccess(visionText: Text)
+    fun onFailure(exception: Exception)
+}
+
 class TextAnalyzer(
     private val textRecognizer: TextRecognizer,
-    private val extractedText: MutableMap<String, String>
+//    private val extractedText: MutableMap<String, String>,
+    private val callback: TextRecognitionCallback
 ) : ImageAnalysis.Analyzer {
     @OptIn(ExperimentalGetImage::class)
     override fun analyze(imageProxy: ImageProxy) {
@@ -22,53 +28,16 @@ class TextAnalyzer(
             textRecognizer.process(image)
                 .addOnSuccessListener { visionText ->
                     // Task completed successfully
+                    callback.onSuccess(visionText)
+
                     Timber.d("visionText: ${visionText.text}\n")
 
-                    visionText?.let { res ->
-                        for (block in res.textBlocks) {
-                            val blockText = block.text
 
-                            // Check for specific keywords
-                            if (blockText.contains("SUBTOTAL", ignoreCase = true)) {
-                                // Extract subtotal from the current block
-                                extractSubtotalFromBlock(block)
 
-                                // Look for nearby lines for subtotal
-                                val nearbyLines = findNearbyLines(res, block)
-                                for ((index, line) in nearbyLines.withIndex()) {
-                                    // Extract every second value from the nearby lines
-                                    if (index % 2 == 1) {
-                                        val subtotalFromLine = extractSubtotalFromLine(line)
-                                        extractedText["SUBTOTAL"] = subtotalFromLine
-                                    }
-                                }
-                            } else if (blockText.contains("CASH", ignoreCase = true)) {
-                                // Extract subtotal from the current block
-                                extractSubtotalFromBlock(block)
-
-                                // Look for nearby lines for subtotal
-                                val nearbyLines = findNearbyLines(res, block)
-                                for ((index, line) in nearbyLines.withIndex()) {
-                                    // Extract every second value from the nearby lines
-                                    if (index % 2 == 1) {
-                                        val subtotalFromLine = extractSubtotalFromLine(line)
-                                        extractedText["CASH"] = subtotalFromLine
-                                    }
-                                }
-                            } else if (blockText.contains(
-                                    "TAX EXCLUSIVE TOTAL",
-                                    ignoreCase = true
-                                )
-                            ) {
-                                extractTaxExclusiveTotal(block)
-                            }
-                            Timber.d("blockText - $blockText")
-                        }
-                    }
-                    Timber.d("extractedText - $extractedText")
                 }
                 .addOnFailureListener { e ->
                     // Task failed with an exception
+                    callback.onFailure(e)
                     Timber.d("visionText error - ${e.message}")
                 }
 
@@ -119,4 +88,12 @@ class TextAnalyzer(
         Timber.d("Found Tax Exclusive Total: $taxExclusiveTotalText")
         // Add your logic to extract and handle the tax-exclusive total value
     }
+
+    private fun validateVendorName(companyName: String?): String {
+        return if (!companyName.isNullOrBlank()) {
+            companyName.replace("RECEIPT", "", true)
+        } else
+            ""
+    }
+
 }

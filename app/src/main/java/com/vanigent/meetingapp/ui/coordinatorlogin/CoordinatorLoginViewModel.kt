@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.BitmapState
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.ExtractedTextState
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.ReceiptItem
@@ -13,6 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -35,7 +37,7 @@ class CoordinatorLoginViewModel @Inject constructor() : ViewModel() {
             receiptItems = emptyList()
         )
     )
-    val recognizedText = _extractedTextState.asStateFlow()
+    val extractedTextState = _extractedTextState.asStateFlow()
 
 
 //    fun updateBitmapHolder(bitmap: Bitmap?) {
@@ -94,20 +96,30 @@ class CoordinatorLoginViewModel @Inject constructor() : ViewModel() {
     }
 
     fun updateReceiptDetails(extractedText: MutableMap<String, String>, bitmap: Bitmap) {
-        Timber.d("extractedText VM - $extractedText")
+        Timber.e("call updateReceiptDetails")
+        extractedText.map {
+            Timber.e("extractedText VM:\n ${it.key} - ${it.value}")
+        }
+
         _extractedTextState.update { state ->
-            Timber.d("state.receiptNumber - ${state.receiptNumber}")
+            val newMap = state.mapOfStrings.toMutableMap().apply { putAll(extractedText) }
+
+            val updatedReceiptItems = state.receiptItems.toMutableList().apply {
+                add(
+                    ReceiptItem(
+                        title = "Receipt ${state.receiptNumber + 1}",
+                        mapOfStrings = newMap.toMutableMap(), // Create a deep copy here
+                        bitmap = bitmap
+                    )
+                )
+            }
+
             state.copy(
                 receiptNumber = state.receiptNumber + 1,
-                mapOfStrings = extractedText,
+                mapOfStrings = newMap.toMutableMap(), // Create a deep copy here
                 bitmap = bitmap,
-                receiptItems = state.receiptItems + ReceiptItem(
-                    title = "Receipt ${state.receiptNumber + 1}",
-                    mapOfStrings = extractedText,
-                    bitmap = bitmap
-                )
+                receiptItems = updatedReceiptItems
             )
         }
     }
-
 }
