@@ -51,32 +51,44 @@ fun CoordinatorLoginScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-//        LazyColumn(
-//            modifier = Modifier.weight(1f)
-//        ) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+        ) {
+            SearchBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
+            )
 
-//            item {
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                ) {
-                    DataEntryForm()
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+            ) {
 
-                    Timber.e("extractedTextState.receiptItems - ${extractedTextState.receiptItems.size}")
-                    extractedTextState.receiptItems.forEachIndexed { index, receiptItem ->
-                        Timber.e("${receiptItem.mapOfStrings}")
-                        ReceiptDetailsCard(
-                            receiptItem = receiptItem,
-                        )
-                        if (index < extractedTextState.receiptItems.size - 1) {
-                            Spacer(modifier = Modifier.height(8.dp))
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        DataEntryForm()
+
+                        Timber.e("extractedTextState.receiptItems - ${extractedTextState.receiptItems.size}")
+                        extractedTextState.receiptItems.forEachIndexed { index, receiptItem ->
+                            Timber.e("${receiptItem.mapOfStrings}")
+                            ReceiptDetailsCard(
+                                receiptItem = receiptItem,
+                            )
+                            if (index < extractedTextState.receiptItems.size - 1) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
                         }
-                    }
 
+                    }
                 }
-//            }
-//        }
+            }
+
+        }
 
         Spacer(modifier = Modifier.width(8.dp))
 
@@ -92,6 +104,7 @@ fun CoordinatorLoginScreen(
             )
             Timber.e("After calling updateReceiptDetails")
         }
+
     }
 }
 
@@ -183,6 +196,7 @@ fun SearchResults(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchBar(
+    modifier: Modifier,
     viewModel: CoordinatorLoginViewModel = hiltViewModel()
 ) {
 
@@ -202,9 +216,7 @@ fun SearchBar(
     }
 
     SearchBar(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = if (isActive) 0.dp else 8.dp),
+        modifier = modifier,
         query = searchBarState.searchString ?: "",
         onQueryChange = viewModel::onSearchTextChanged,
         onSearch = {
@@ -244,8 +256,6 @@ fun SearchBar(
 @Composable
 fun DataEntryForm(
 ) {
-    SearchBar()
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
