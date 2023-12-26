@@ -4,17 +4,16 @@ import android.graphics.Bitmap
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import com.vanigent.meetingapp.domain.model.Address
+import com.vanigent.meetingapp.domain.model.SampleAddresses
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.BitmapState
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.ExtractedTextState
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.ReceiptItem
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.SearchBarState
-import com.vanigent.meetingapp.util.SampleAddresses
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -60,7 +59,7 @@ class CoordinatorLoginViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    fun onSearchAddress(text: String): List<String> {
+    fun onSearchAddress(text: String): List<Address> {
         val searchText = text.trim().lowercase()
 
         return SampleAddresses.addresses.filter { address ->
@@ -75,13 +74,14 @@ class CoordinatorLoginViewModel @Inject constructor() : ViewModel() {
                     || searchText in trimmedLineOne
                     || searchText in trimmedCity
                     || searchText in trimmedState
-        }.map { it.lineOne }
+        }
     }
 
-    fun onAddressItemSelected(address: String) {
+    fun onAddressItemSelected(address: Address) {
         _searchBarState.update {
             it.copy(
-                searchString = address
+                searchString = address.officeName,
+                selectedResultsDisplay = address
             )
         }
     }

@@ -14,4 +14,7 @@
     <string name="receipt">Receipt</string>
     <string name="permanently_declined_permission">It seems like you permanently declined camera permission. You can go to the app settings to grant it.</string>
     <string name="need_access_to_your_camera">This app needs access to your camera so that you can capture receipts.</string>
+    <string name="physician">Physician</string>
+    <string name="office">Office</string>
+    <string name="city">City</string>
 </resources>

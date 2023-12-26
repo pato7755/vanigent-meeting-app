@@ -34,10 +34,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vanigent.meetingapp.R
+import com.vanigent.meetingapp.domain.model.Address
 import com.vanigent.meetingapp.ui.common.SectionHeader
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.ReceiptItem
+import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.SearchBarState
 import com.vanigent.meetingapp.ui.settings.ToggleableInfo
 import com.vanigent.meetingapp.util.Constants.SEVENTY_PERCENT
+import com.vanigent.meetingapp.util.Constants.THIRTY_PERCENT
 import timber.log.Timber
 
 @Composable
@@ -71,7 +74,7 @@ fun CoordinatorLoginScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                     ) {
-                        DataEntryForm()
+                        RadioButtonCard()
 
                         Timber.e("extractedTextState.receiptItems - ${extractedTextState.receiptItems.size}")
                         extractedTextState.receiptItems.forEachIndexed { index, receiptItem ->
@@ -153,45 +156,14 @@ fun ReceiptDetailsCard(
         }
         receiptItem.mapOfStrings.forEach { (key, value) ->
             println("Key: $key, Value: $value")
-            ReceiptDetails(
+            LabeledTextRow(
                 label = key,
-                text = value
+                value = value
             )
         }
 
     }
 }
-
-@Composable
-fun SearchResults(
-    addresses: List<String>,
-    onItemSelected: (String) -> Unit
-) {
-    // Display the search results here
-    LazyColumn {
-        items(addresses) { address ->
-            Row(
-                modifier = Modifier.clickable {
-                    onItemSelected(address)
-                }
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.LocationOn,
-                    contentDescription = stringResource(R.string.location),
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .align(Alignment.CenterVertically)
-                )
-                Text(
-                    text = address,
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                )
-            }
-
-        }
-    }
-}
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -212,7 +184,7 @@ fun SearchBar(
     }
 
     var searchResults by remember {
-        mutableStateOf<List<String>>(emptyList())
+        mutableStateOf<List<Address>>(emptyList())
     }
 
     SearchBar(
@@ -243,18 +215,92 @@ fun SearchBar(
             }
         }
         if (searchResults.isNotEmpty())
-            SearchResults(addresses = searchResults) { selectedAddress ->
+            SearchResults(
+                addresses = searchResults,
+            ) { selectedAddress ->
                 viewModel.onAddressItemSelected(selectedAddress)
-                historyItems.add(selectedAddress)
+                historyItems.add(selectedAddress.officeName)
                 isActive = false
                 searchResults = emptyList()
             }
     }
 
+    AddressDetailsBox(searchBarState = searchBarState)
+
+}
+
+
+@Composable
+fun SearchResults(
+    addresses: List<Address>,
+    onItemSelected: (Address) -> Unit
+) {
+    // Display the search results here
+    LazyColumn {
+        items(addresses) { address ->
+            Row(
+                modifier = Modifier.clickable {
+                    onItemSelected(address)
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.LocationOn,
+                    contentDescription = stringResource(R.string.location),
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .align(Alignment.CenterVertically)
+                )
+                Text(
+                    text = address.officeName,
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                )
+            }
+
+        }
+    }
+
 }
 
 @Composable
-fun DataEntryForm(
+fun AddressDetailsBox(
+    searchBarState: SearchBarState
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp),
+    ) {
+        searchBarState.selectedResultsDisplay?.let {
+            Column {
+                LabeledTextRow(
+                    label = stringResource(R.string.physician),
+                    value = it.physicianName,
+                    labelModifier = Modifier.weight(THIRTY_PERCENT),
+                    valueModifier = Modifier.weight(1f),
+                    labelColor = Color.Gray
+                )
+                LabeledTextRow(
+                    label = stringResource(R.string.address),
+                    value = it.lineOne,
+                    labelModifier = Modifier.weight(THIRTY_PERCENT),
+                    valueModifier = Modifier.weight(1f),
+                    labelColor = Color.Gray
+                )
+                LabeledTextRow(
+                    label = stringResource(R.string.city),
+                    value = it.city,
+                    labelModifier = Modifier.weight(THIRTY_PERCENT),
+                    valueModifier = Modifier.weight(1f),
+                    labelColor = Color.Gray
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
+fun RadioButtonCard(
 ) {
     Card(
         modifier = Modifier
@@ -371,18 +417,28 @@ fun ReceiptImageItem() {
 
 
 @Composable
-fun ReceiptDetails(
+fun LabeledTextRow(
+    labelModifier: Modifier = Modifier,
+    valueModifier: Modifier = Modifier,
+    labelColor: Color = Color.Unspecified,
+    valueColor: Color = Color.Unspecified,
     label: String = "",
-    text: String = ""
+    value: String = "",
 ) {
     Row {
         Text(
             text = label,
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier
+                .padding(8.dp)
+                .then(labelModifier),
+            color = if (labelColor != Color.Unspecified) labelColor else LocalContentColor.current,
         )
         Text(
-            text = text,
-            modifier = Modifier.padding(8.dp)
+            text = value,
+            modifier = Modifier
+                .padding(8.dp)
+                .then(valueModifier),
+            color = if (valueColor != Color.Unspecified) valueColor else LocalContentColor.current,
         )
 
     }

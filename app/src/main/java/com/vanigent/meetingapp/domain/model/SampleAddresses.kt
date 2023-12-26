@@ -1,4 +1,4 @@
-package com.vanigent.meetingapp.util
+package com.vanigent.meetingapp.domain.model
 
 data class Address(
     val physicianName: String,
