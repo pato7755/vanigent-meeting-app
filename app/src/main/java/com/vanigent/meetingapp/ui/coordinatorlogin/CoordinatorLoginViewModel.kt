@@ -39,17 +39,6 @@ class CoordinatorLoginViewModel @Inject constructor() : ViewModel() {
     )
     val extractedTextState = _extractedTextState.asStateFlow()
 
-
-//    fun updateBitmapHolder(bitmap: Bitmap?) {
-//        bitmap?.let {
-//            _bitmapState.update { state ->
-//                state.copy(
-//                    bitmap = it
-//                )
-//            }
-//        }
-//    }
-
     fun dismissDialog() {
         visiblePermissionDialogQueue.removeFirst()
     }
@@ -75,12 +64,14 @@ class CoordinatorLoginViewModel @Inject constructor() : ViewModel() {
         val searchText = text.trim().lowercase()
 
         return SampleAddresses.addresses.filter { address ->
+            val officeName = address.officeName.trim().lowercase()
             val trimmedPhysicianName = address.physicianName.trim().lowercase()
             val trimmedLineOne = address.lineOne.trim().lowercase()
             val trimmedCity = address.city.trim().lowercase()
             val trimmedState = address.state.trim().lowercase()
 
-            searchText in trimmedPhysicianName
+            searchText in officeName
+                    || searchText in trimmedPhysicianName
                     || searchText in trimmedLineOne
                     || searchText in trimmedCity
                     || searchText in trimmedState

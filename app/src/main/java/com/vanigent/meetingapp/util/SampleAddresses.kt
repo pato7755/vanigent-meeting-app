@@ -2,6 +2,7 @@ package com.vanigent.meetingapp.util
 
 data class Address(
     val physicianName: String,
+    val officeName: String,
     val lineOne: String,
     val city: String,
     val state: String,
@@ -13,6 +14,7 @@ object SampleAddresses {
     val addresses = listOf(
         Address(
             physicianName = "Mark Spencer",
+            officeName = "OhioHealth Physician Group, Inc.",
             lineOne = "3303 Pico Blvd Ste G",
             city = "Santa Monica",
             state = "CA",
@@ -20,6 +22,7 @@ object SampleAddresses {
         ),
         Address(
             physicianName = "John Wick",
+            officeName = "Deep Eddy Psychotherapy Management, LLC",
             lineOne = "333 N Braddock Ave",
             city = "Pittsburgh",
             state = "PA",
@@ -27,6 +30,7 @@ object SampleAddresses {
         ),
         Address(
             physicianName = "Tom Jerry",
+            officeName = "Lee Memorial Health System",
             lineOne = "7033 Saint Andrews Rd Ste 205",
             city = "Columbia",
             state = "SC",
@@ -34,6 +38,7 @@ object SampleAddresses {
         ),
         Address(
             physicianName = "Bill Clark",
+            officeName = "Atrium Health",
             lineOne = "11100 Euclid Ave",
             city = "Cleveland",
             state = "OH",
@@ -41,6 +46,7 @@ object SampleAddresses {
         ),
         Address(
             physicianName = "Robert Stanfield",
+            officeName = "Daymark Recovery Services Inc",
             lineOne = "6135 Barfield Rd Ste 200",
             city = "Atlanta",
             state = "GA",
@@ -48,6 +54,7 @@ object SampleAddresses {
         ),
         Address(
             physicianName = "Julia McCarthy",
+            officeName = "The Permanente Medical Group",
             lineOne = "1110 W Peachtree St NW Ste 1100",
             city = "Atlanta",
             state = "GA",
@@ -55,6 +62,7 @@ object SampleAddresses {
         ),
         Address(
             physicianName = "Rutherford Spears",
+            officeName = "BayCare Medical Group, Inc.",
             lineOne = "600 Grant St",
             city = "Pittsburgh",
             state = "PA",
@@ -62,6 +70,7 @@ object SampleAddresses {
         ),
         Address(
             physicianName = "John Smith",
+            officeName = "Cook County",
             lineOne = "3340 Peachtree Rd NE Ste 850",
             city = "Atlanta",
             state = "PA",
