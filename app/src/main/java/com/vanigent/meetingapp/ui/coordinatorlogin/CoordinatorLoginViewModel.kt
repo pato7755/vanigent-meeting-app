@@ -99,7 +99,7 @@ class CoordinatorLoginViewModel @Inject constructor() : ViewModel() {
                 add(
                     ReceiptItem(
                         title = "Receipt ${state.receiptNumber + 1}",
-                        mapOfStrings = newMap.toMutableMap(), // Create a deep copy here
+                        mapOfStrings = newMap.toMutableMap(),
                         bitmap = bitmap
                     )
                 )
@@ -107,7 +107,7 @@ class CoordinatorLoginViewModel @Inject constructor() : ViewModel() {
 
             state.copy(
                 receiptNumber = state.receiptNumber + 1,
-                mapOfStrings = newMap.toMutableMap(), // Create a deep copy here
+                mapOfStrings = newMap.toMutableMap(),
                 bitmap = bitmap,
                 receiptItems = updatedReceiptItems
             )

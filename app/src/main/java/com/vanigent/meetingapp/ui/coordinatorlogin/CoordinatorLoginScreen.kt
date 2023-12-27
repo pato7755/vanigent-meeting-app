@@ -36,6 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vanigent.meetingapp.R
 import com.vanigent.meetingapp.domain.model.Address
 import com.vanigent.meetingapp.ui.common.SectionHeader
+import com.vanigent.meetingapp.ui.coordinatorlogin.components.CameraStuff
 import com.vanigent.meetingapp.ui.coordinatorlogin.components.LabeledTextRow
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.ReceiptItem
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.SearchBarState
@@ -236,7 +237,6 @@ fun SearchResults(
     addresses: List<Address>,
     onItemSelected: (Address) -> Unit
 ) {
-    // Display the search results here
     LazyColumn {
         items(addresses) { address ->
             Row(

@@ -1,11 +1,10 @@
-package com.vanigent.meetingapp.ui.coordinatorlogin
+package com.vanigent.meetingapp.ui.coordinatorlogin.components
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
-import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture.OnImageCapturedCallback
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
@@ -42,11 +41,12 @@ import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.TextRecognizer
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
-import com.vanigent.meetingapp.ui.coordinatorlogin.components.PhotoBottomSheetContent
-import kotlinx.coroutines.Dispatchers
+import com.vanigent.meetingapp.ui.coordinatorlogin.TextAnalyzer
+import com.vanigent.meetingapp.ui.coordinatorlogin.TextRecognitionCallback
 import kotlinx.coroutines.launch
 import timber.log.Timber
-//private var isPhotoCaptured = false // Add this flag at the beginning of the file
+
+private const val LINE_VERTICAL_THRESHOLD = 10
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,15 +67,6 @@ fun CameraStuff(
             )
         }
     }
-
-    // TextRecognitionCallback implementation
-//    val textRecognitionCallback = remember {
-//        object : TextRecognitionCallback {
-//
-//
-//
-//        }
-//    }
 
     val textRecognizer = remember {
         TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
@@ -160,8 +151,7 @@ fun CameraStuff(
                             extractedText = extractedText,
                             context = context,
                             closeCameraPreview = closeCameraPreview,
-                            onReceiptDetailsUpdated = onReceiptDetailsUpdated,
-//                            textRecognitionCallback = textRecognitionCallback
+                            onReceiptDetailsUpdated = onReceiptDetailsUpdated
                         )
                     }
                 ) {
@@ -182,10 +172,7 @@ private fun takePhoto(
     context: Context,
     closeCameraPreview: (Bitmap?) -> Unit,
     onReceiptDetailsUpdated: (MutableMap<String, String>, Bitmap) -> Unit,
-//    textRecognitionCallback: TextRecognitionCallback
 ) {
-
-
 
     controller.takePicture(
         ContextCompat.getMainExecutor(context),
@@ -210,26 +197,17 @@ private fun takePhoto(
                 imageProxy.let {
                     TextAnalyzer(
                         textRecognizer = textRecognizer,
-//                        extractedText = extractedText
                         callback = object : TextRecognitionCallback {
                             override fun onSuccess(visionText: Text) {
-//                                if (isPhotoCaptured) {
-//                                    Timber.e("Photo has already been captured. Ignoring.")
-//                                    return
-//                                }
-//                                Timber.e("Photo hasn't been captured. Continuing.")
-//                                isPhotoCaptured = true // Set the flag to true to prevent further calls
 
-                                // Handle successful recognition
-                                // Extracted text is available here
                                 Timber.e("extractedText cameraStuff")
-//                                extractedText.clear()
                                 visionText.let { res ->
 
                                     if (res.text.isBlank()) {
                                         Timber.e("Could not read receipt")
                                     } else {
-                                        val firstBlock = res.textBlocks.firstOrNull()?.text.toString()
+                                        val firstBlock =
+                                            res.textBlocks.firstOrNull()?.text.toString()
                                         val vendorName = validateVendorName(firstBlock)
                                         Timber.d("vendorName - $vendorName")
                                         extractedText["VENDOR NAME"] = vendorName
@@ -239,66 +217,34 @@ private fun takePhoto(
 
                                             Timber.d("block - $blockText")
 
-                                            val potentialAmountLabels = listOf("TOTAL", "AMOUNT")
+                                            val potentialLabels = listOf("TOTAL", "CATERER")
 
-
-                                            // Check for specific keywords
-                                            if (blockText.contains("TOTAL", ignoreCase = true)) {
-                                                // Extract subtotal from the current block
-                                                extractSubtotalFromBlock(block)
-
-                                                // Look for nearby lines for subtotal
-                                                val nearbyLines = findNearbyLines(res, block)
-                                                for ((index, line) in nearbyLines.withIndex()) {
-                                                    // Extract every second value from the nearby lines
-                                                    if (index % 2 == 1) {
-                                                        val subtotalFromLine = extractSubtotalFromLine(line)
-                                                        extractedText["TOTAL"] = subtotalFromLine
-                                                    }
+                                            for (label in potentialLabels) {
+                                                if (label.equals("Sub Total", ignoreCase = true) ||
+                                                    label.equals("SubTotal", ignoreCase = true)) {
+                                                    continue // Skip processing for "Sub Total"
                                                 }
-                                            } else if (blockText.contains("ADDRESS", ignoreCase = true)) {
-                                                extractSubtotalFromBlock(block)
 
-                                                // Look for nearby lines for subtotal
-                                                val nearbyLines = findNearbyLines(res, block)
-                                                for ((index, line) in nearbyLines.withIndex()) {
-                                                    // Extract every second value from the nearby lines
-                                                    if (index % 2 == 1) {
-                                                        val subtotalFromLine = extractSubtotalFromLine(line)
-                                                        extractedText["ADDRESS"] = subtotalFromLine
-                                                    }
-                                                }
-                                            } else if (blockText.contains("CASH", ignoreCase = true)) {
-                                                // Extract subtotal from the current block
-                                                extractSubtotalFromBlock(block)
-
-                                                // Look for nearby lines for subtotal
-                                                val nearbyLines = findNearbyLines(res, block)
-                                                for ((index, line) in nearbyLines.withIndex()) {
-                                                    // Extract every second value from the nearby lines
-                                                    if (index % 2 == 1) {
-                                                        val subtotalFromLine = extractSubtotalFromLine(line)
-                                                        extractedText["CASH"] = subtotalFromLine
+                                                if (blockText.contains(label, ignoreCase = true)) {
+                                                    val nearbyLines = findNearbyLines(res, block)
+                                                    for ((index, line) in nearbyLines.withIndex()) {
+                                                        // Extract every second value from the nearby lines
+                                                        if (index % 2 == 1) {
+                                                            val subtotalFromLine =
+                                                                extractTextFromLine(line)
+                                                            extractedText[label] = subtotalFromLine
+                                                        }
                                                     }
                                                 }
                                             }
-                                            Timber.d("blockText - $blockText")
                                         }
                                     }
 
-                                    Timber.e("extractedText.isEmpty() - ${extractedText.isEmpty()}")
-                                    extractedText.map { text ->
-                                        Timber.e("\n ${text.key} - ${text.value}")
-                                    }
-
                                     // Update extractedText here
-
                                     extractedText.putAll(extractedText)
 
                                     // Call onReceiptDetailsUpdated with rotatedBitmap
                                     onReceiptDetailsUpdated(extractedText, rotatedBitmap)
-
-
 
                                 }
                             }
@@ -309,14 +255,7 @@ private fun takePhoto(
                             }
                         }
 
-
                     ).analyze(it)
-
-//                    Timber.e("extractedText cameraStuff")
-//                    extractedText.map {text ->
-//                        Timber.e("\n ${text.key} - ${text.value}")
-//                    }
-//                    onReceiptDetailsUpdated(extractedText, rotatedBitmap)
                 }
 
                 closeCameraPreview(rotatedBitmap)
@@ -348,23 +287,6 @@ fun CameraPreview(
     )
 }
 
-@Composable
-fun FullScreenCameraPreview(
-    controller: LifecycleCameraController,
-    modifier: Modifier = Modifier
-) {
-    val lifecycleOwner = LocalLifecycleOwner.current
-    AndroidView(
-        factory = {
-            PreviewView(it).apply {
-                this.controller = controller
-                controller.bindToLifecycle(lifecycleOwner)
-            }
-        },
-        modifier = modifier
-    )
-}
-
 private fun findNearbyLines(visionText: Text, targetBlock: Text.TextBlock): List<Text.Line> {
     val nearbyLines = mutableListOf<Text.Line>()
 
@@ -375,11 +297,20 @@ private fun findNearbyLines(visionText: Text, targetBlock: Text.TextBlock): List
             val lineBoundingText = line.boundingBox
 
             if (lineBoundingText != null && targetBoundingText != null) {
-
-                if ((lineBoundingText.bottom >= targetBoundingText.top)
-                    && (lineBoundingText.top <= targetBoundingText.bottom)
-                ) {
-                    nearbyLines.add(line)
+                if (isValueOnTheRight(line, targetBlock)) {
+                    // For lines with value on the right, use the original condition
+                    if ((lineBoundingText.bottom >= targetBoundingText.top)
+                        && (lineBoundingText.top <= targetBoundingText.bottom)
+                    ) {
+                        nearbyLines.add(line)
+                    }
+                } else {
+                    // For lines with value below, use the condition with the threshold
+                    if ((lineBoundingText.bottom >= targetBoundingText.top)
+                        && (lineBoundingText.top <= targetBoundingText.bottom + LINE_VERTICAL_THRESHOLD)
+                    ) {
+                        nearbyLines.add(line)
+                    }
                 }
             }
         }
@@ -388,14 +319,7 @@ private fun findNearbyLines(visionText: Text, targetBlock: Text.TextBlock): List
     return nearbyLines
 }
 
-private fun extractSubtotalFromBlock(block: Text.TextBlock) {
-    // Implement logic to extract subtotal information from the block
-    val subtotalText = block.text
-    Timber.d("Found Subtotal in Block: $subtotalText")
-    // Add your logic to extract and handle the subtotal value
-}
-
-private fun extractSubtotalFromLine(line: Text.Line): String {
+private fun extractTextFromLine(line: Text.Line): String {
     // Implement logic to extract subtotal information from the line
     val subtotalText = line.text
     Timber.d("Found Subtotal in Line: $subtotalText")
@@ -403,16 +327,19 @@ private fun extractSubtotalFromLine(line: Text.Line): String {
     return subtotalText
 }
 
-private fun extractTaxExclusiveTotal(block: Text.TextBlock) {
-    // Implement logic to extract tax-exclusive total information from the block
-    val taxExclusiveTotalText = block.text
-    Timber.d("Found Tax Exclusive Total: $taxExclusiveTotalText")
-    // Add your logic to extract and handle the tax-exclusive total value
-}
-
 private fun validateVendorName(companyName: String?): String {
     return if (!companyName.isNullOrBlank()) {
         companyName.replace("RECEIPT", "", true)
     } else
         ""
+}
+
+// Function to check if the value is on the right of the label
+private fun isValueOnTheRight(line: Text.Line, labelBlock: Text.TextBlock): Boolean {
+    // Implement logic to check if the value is on the right of the label
+    // You may need to analyze the relative positions of the line and label bounding boxes
+    // and return true if the value is on the right, false otherwise.
+    // For simplicity, this function assumes that if the line's left is to the right of the label's right,
+    // then the value is on the right.
+    return (line.boundingBox?.left ?: 0) > (labelBlock.boundingBox?.right ?: 0)
 }
