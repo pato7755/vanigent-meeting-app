@@ -36,6 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vanigent.meetingapp.R
 import com.vanigent.meetingapp.domain.model.Address
 import com.vanigent.meetingapp.ui.common.SectionHeader
+import com.vanigent.meetingapp.ui.coordinatorlogin.components.LabeledTextRow
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.ReceiptItem
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.SearchBarState
 import com.vanigent.meetingapp.ui.settings.ToggleableInfo
@@ -414,36 +415,6 @@ fun ReceiptImageItem() {
     }
 
 }
-
-
-@Composable
-fun LabeledTextRow(
-    labelModifier: Modifier = Modifier,
-    valueModifier: Modifier = Modifier,
-    labelColor: Color = Color.Unspecified,
-    valueColor: Color = Color.Unspecified,
-    label: String = "",
-    value: String = "",
-) {
-    Row {
-        Text(
-            text = label,
-            modifier = Modifier
-                .padding(8.dp)
-                .then(labelModifier),
-            color = if (labelColor != Color.Unspecified) labelColor else LocalContentColor.current,
-        )
-        Text(
-            text = value,
-            modifier = Modifier
-                .padding(8.dp)
-                .then(valueModifier),
-            color = if (valueColor != Color.Unspecified) valueColor else LocalContentColor.current,
-        )
-
-    }
-}
-
 
 @Composable
 fun RadioButtons() {
