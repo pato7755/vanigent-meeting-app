@@ -11,16 +11,13 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cameraswitch
-import androidx.compose.material.icons.filled.Photo
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,7 +40,6 @@ import com.google.mlkit.vision.text.TextRecognizer
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.vanigent.meetingapp.ui.coordinatorlogin.TextAnalyzer
 import com.vanigent.meetingapp.ui.coordinatorlogin.TextRecognitionCallback
-import kotlinx.coroutines.launch
 import timber.log.Timber
 
 private const val LINE_VERTICAL_THRESHOLD = 10
@@ -57,7 +53,6 @@ fun CameraStuff(
 ) {
     Timber.e("Camera stuff")
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val scaffoldState = rememberBottomSheetScaffoldState()
     val controller = remember {
         LifecycleCameraController(context).apply {
@@ -71,21 +66,6 @@ fun CameraStuff(
     val textRecognizer = remember {
         TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
     }
-
-//    val textAnalyzer = remember {
-//        TextAnalyzer(textRecognizer = textRecognizer, callback = textRecognitionCallback)
-//    }
-
-    // Create a new ImageAnalysis instance
-//    val imageAnalysis = remember {
-//        ImageAnalysis.Builder()
-//            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-//            .build()
-//    }
-
-    // Set the ImageAnalysis analyzer
-//    imageAnalysis.setAnalyzer(Dispatchers.Main, textAnalyzer::analyze)
-
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
@@ -124,44 +104,26 @@ fun CameraStuff(
                 )
             }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceAround
+            IconButton(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                onClick = {
+                    takePhoto(
+                        controller = controller,
+                        textRecognizer = textRecognizer,
+                        extractedText = extractedText,
+                        context = context,
+                        closeCameraPreview = closeCameraPreview,
+                        onReceiptDetailsUpdated = onReceiptDetailsUpdated
+                    )
+                }
             ) {
-                IconButton(
-                    onClick = {
-                        scope.launch {
-                            scaffoldState.bottomSheetState.expand()
-                        }
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Photo,
-                        contentDescription = "Open gallery"
-                    )
-                }
-                IconButton(
-                    onClick = {
-                        takePhoto(
-                            controller = controller,
-                            textRecognizer = textRecognizer,
-                            extractedText = extractedText,
-                            context = context,
-                            closeCameraPreview = closeCameraPreview,
-                            onReceiptDetailsUpdated = onReceiptDetailsUpdated
-                        )
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PhotoCamera,
-                        contentDescription = "Take photo"
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Default.PhotoCamera,
+                    contentDescription = "Take photo"
+                )
             }
         }
+
     }
 }
 
@@ -217,13 +179,14 @@ private fun takePhoto(
 
                                             Timber.d("block - $blockText")
 
+                                            if (blockText.equals("Sub Total", ignoreCase = true) ||
+                                                blockText.equals("SubTotal", ignoreCase = true)) {
+                                                continue // Skip processing for "Sub Total"
+                                            }
+
                                             val potentialLabels = listOf("TOTAL", "CATERER")
 
                                             for (label in potentialLabels) {
-                                                if (label.equals("Sub Total", ignoreCase = true) ||
-                                                    label.equals("SubTotal", ignoreCase = true)) {
-                                                    continue // Skip processing for "Sub Total"
-                                                }
 
                                                 if (blockText.contains(label, ignoreCase = true)) {
                                                     val nearbyLines = findNearbyLines(res, block)
