@@ -184,7 +184,7 @@ private fun takePhoto(
                                                 continue // Skip processing for "Sub Total"
                                             }
 
-                                            val potentialLabels = listOf("TOTAL", "CATERER")
+                                            val potentialLabels = listOf("TOTAL", "CATERER", "DATE")
 
                                             for (label in potentialLabels) {
 
