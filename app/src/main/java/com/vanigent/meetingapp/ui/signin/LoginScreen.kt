@@ -13,18 +13,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Key
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Password
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.WifiPassword
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Button
@@ -32,7 +24,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,7 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -56,7 +46,9 @@ import com.vanigent.meetingapp.R
 import com.vanigent.meetingapp.util.Constants
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(
+    onLoginButtonClicked: () -> Unit
+) {
 
     Row(
         modifier = Modifier.fillMaxSize()
@@ -66,7 +58,9 @@ fun LoginScreen() {
                 .fillMaxHeight()
                 .weight(1f)
         ) {
-            LoginFormSection()
+            LoginFormSection(
+                onLoginButtonClicked
+            )
         }
 
         Column(
@@ -82,6 +76,7 @@ fun LoginScreen() {
 
 @Composable
 fun LoginFormSection(
+    onLoginButtonClicked: () -> Unit,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
 
@@ -97,10 +92,10 @@ fun LoginFormSection(
         Column(
             modifier = Modifier
                 .fillMaxWidth(fraction = 0.7f)
-                .wrapContentHeight()
-                .align(Alignment.TopCenter)
+                .fillMaxHeight()
+                .align(Alignment.TopCenter),
+            verticalArrangement = Arrangement.Center
         ) {
-            Spacer(modifier = Modifier.height(50.dp))
 
             Image(
                 painter = painterResource(id = R.drawable.app_logo),
@@ -112,25 +107,37 @@ fun LoginFormSection(
 
             // Username textfield
             OutlinedTextField(
-//                shape = RoundedCornerShape(20.dp),
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 label = { Text("Username") },
                 value = TextFieldValue(usernameState.username),
-                leadingIcon = { Icon(imageVector = Icons.Outlined.Person, contentDescription = "Username Icon") },
-                onValueChange = { viewModel.onUsernameTextChanged(usernameState.username) }
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Outlined.Person,
+                        contentDescription = "Username Icon"
+                    )
+                },
+                onValueChange = { newUsername ->
+                    viewModel.onUsernameTextChanged(newUsername.text)
+                }
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             // Password textfield
             OutlinedTextField(
-//                shape = RoundedCornerShape(20.dp),
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 label = { Text("Password") },
                 value = TextFieldValue(passwordState.password),
-                leadingIcon = { Icon(imageVector = Icons.Outlined.Lock, contentDescription = "Password Icon") },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Outlined.Lock,
+                        contentDescription = "Password Icon"
+                    )
+                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                onValueChange = { viewModel.onPasswordTextChanged(passwordState.password) }
+                onValueChange = { newPassword ->
+                    viewModel.onPasswordTextChanged(newPassword.text)
+                }
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -143,13 +150,13 @@ fun LoginFormSection(
                     containerColor = colorResource(id = R.color.vanigent_light_green),
                     contentColor = Color.White
                 ),
-                elevation =  ButtonDefaults.buttonElevation(
+                elevation = ButtonDefaults.buttonElevation(
                     defaultElevation = 10.dp,
                     pressedElevation = 15.dp,
                     disabledElevation = 0.dp
                 ),
                 shape = RoundedCornerShape(20.dp),
-                onClick = { /*TODO*/ }
+                onClick = { onLoginButtonClicked() }
             ) {
                 Text(text = "SIGN IN")
             }
@@ -200,7 +207,9 @@ fun ImageSection() {
     heightDp = 480
 )
 fun MediumSizedTablet() {
-    LoginScreen()
+    LoginScreen(
+        onLoginButtonClicked = {}
+    )
 }
 
 @Composable
@@ -210,6 +219,8 @@ fun MediumSizedTablet() {
     heightDp = 840
 )
 fun ExpandedSizedTablet() {
-    LoginScreen()
+    LoginScreen(
+        onLoginButtonClicked = {}
+    )
 }
 
