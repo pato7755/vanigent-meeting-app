@@ -93,29 +93,33 @@ fun AttendeesLoginScreen(
                     OutlinedTextField(
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text("Last Name") },
-                        value = TextFieldValue(lastNameState.lastName),
+                        value = lastNameState.lastName,
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                         onValueChange = {
-                            viewModel.onLastNameTextChanged(it.text)
+                            viewModel.onLastNameTextChanged(it)
                         }
                     )
 
                     OutlinedTextField(
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text("First Name") },
-                        value = TextFieldValue(firstNameState.firstName),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        value = firstNameState.firstName,
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                         onValueChange = {
-                            viewModel.onFirstNameTextChanged(it.text)
+                            viewModel.onFirstNameTextChanged(it)
                         }
                     )
 
                     OutlinedTextField(
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text("PID") },
-                        value = TextFieldValue(pidState.pId.toString()),
+                        value = pidState.pId,
+                        singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         onValueChange = {
-                            viewModel.onPidTextChanged(it.text)
+                            viewModel.onPidTextChanged(it)
                         }
                     )
 
