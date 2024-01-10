@@ -17,4 +17,6 @@
     <string name="physician">Physician</string>
     <string name="office">Office</string>
     <string name="city">City</string>
+    <string name="continue_button">CONTINUE</string>
+    <string name="signature">Signature</string>
 </resources>

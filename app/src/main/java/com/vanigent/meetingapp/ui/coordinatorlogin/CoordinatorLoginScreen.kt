@@ -37,7 +37,9 @@ import com.vanigent.meetingapp.R
 import com.vanigent.meetingapp.domain.model.Address
 import com.vanigent.meetingapp.ui.common.SectionHeader
 import com.vanigent.meetingapp.ui.coordinatorlogin.components.CameraStuff
+import com.vanigent.meetingapp.ui.coordinatorlogin.components.ContinueButton
 import com.vanigent.meetingapp.ui.coordinatorlogin.components.LabeledTextRow
+import com.vanigent.meetingapp.ui.coordinatorlogin.components.RadioButtons
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.ReceiptItem
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.SearchBarState
 import com.vanigent.meetingapp.ui.settings.ToggleableInfo
@@ -47,6 +49,7 @@ import timber.log.Timber
 
 @Composable
 fun CoordinatorLoginScreen(
+    onContinueButtonPressed: () -> Unit,
     viewModel: CoordinatorLoginViewModel = hiltViewModel()
 ) {
     val extractedTextState by viewModel.extractedTextState.collectAsStateWithLifecycle()
@@ -88,6 +91,14 @@ fun CoordinatorLoginScreen(
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
                         }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        ContinueButton(
+                            text = stringResource(R.string.continue_button),
+                            modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally),
+                            onClick = { onContinueButtonPressed() }
+                        )
 
                     }
                 }
@@ -417,56 +428,15 @@ fun ReceiptImageItem() {
 }
 
 @Composable
-fun RadioButtons() {
-    val yesText = stringResource(id = R.string.yes)
-    val noText = stringResource(id = R.string.no)
-    val radioButtons = remember {
-        mutableStateListOf(
-            ToggleableInfo(
-                isChecked = true,
-                text = yesText
-            ),
-            ToggleableInfo(
-                isChecked = false,
-                text = noText
-            )
-        )
-    }
-    radioButtons.forEachIndexed { _, info ->
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.clickable {
-                radioButtons.replaceAll {
-                    it.copy(
-                        isChecked = it.text == info.text
-                    )
-                }
-            }
-        ) {
-            RadioButton(
-                selected = info.isChecked,
-                onClick = {
-                    radioButtons.replaceAll {
-                        it.copy(
-                            isChecked = it.text == info.text
-                        )
-                    }
-                },
-            )
-            Text(text = info.text)
-        }
-
-    }
-}
-
-@Composable
 @Preview(
     showBackground = true,
     widthDp = 600,
     heightDp = 480
 )
 fun MediumSizedTablet() {
-    CoordinatorLoginScreen()
+    CoordinatorLoginScreen(
+        onContinueButtonPressed = {}
+    )
 }
 
 @Composable
@@ -476,6 +446,8 @@ fun MediumSizedTablet() {
     heightDp = 840
 )
 fun ExpandedSizedTablet() {
-    CoordinatorLoginScreen()
+    CoordinatorLoginScreen(
+        onContinueButtonPressed = {}
+    )
 }
 
