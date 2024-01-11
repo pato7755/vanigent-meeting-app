@@ -109,7 +109,7 @@ fun LoginFormSection(
             OutlinedTextField(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 label = { Text("Username") },
-                value = TextFieldValue(usernameState.username),
+                value = usernameState.username,
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Outlined.Person,
@@ -117,7 +117,7 @@ fun LoginFormSection(
                     )
                 },
                 onValueChange = { newUsername ->
-                    viewModel.onUsernameTextChanged(newUsername.text)
+                    viewModel.onUsernameTextChanged(newUsername)
                 }
             )
 
@@ -127,7 +127,7 @@ fun LoginFormSection(
             OutlinedTextField(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 label = { Text("Password") },
-                value = TextFieldValue(passwordState.password),
+                value = passwordState.password,
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Outlined.Lock,
@@ -136,7 +136,7 @@ fun LoginFormSection(
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 onValueChange = { newPassword ->
-                    viewModel.onPasswordTextChanged(newPassword.text)
+                    viewModel.onPasswordTextChanged(newPassword)
                 }
             )
 
