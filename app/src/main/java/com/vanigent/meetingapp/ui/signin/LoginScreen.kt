@@ -17,11 +17,15 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,7 +41,9 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -82,6 +88,17 @@ fun LoginFormSection(
 
     val usernameState by viewModel.usernameState.collectAsStateWithLifecycle()
     val passwordState by viewModel.passwordState.collectAsStateWithLifecycle()
+    var isPasswordVisible by remember { mutableStateOf(false) }
+
+    val trailingIcon = @Composable {
+        IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+            Icon(
+                if (isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                contentDescription = "",
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -110,6 +127,7 @@ fun LoginFormSection(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 label = { Text("Username") },
                 value = usernameState.username,
+                singleLine = true,
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Outlined.Person,
@@ -128,16 +146,20 @@ fun LoginFormSection(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 label = { Text("Password") },
                 value = passwordState.password,
+                singleLine = true,
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Outlined.Lock,
                         contentDescription = "Password Icon"
                     )
                 },
+                trailingIcon = trailingIcon,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 onValueChange = { newPassword ->
                     viewModel.onPasswordTextChanged(newPassword)
-                }
+                },
+                visualTransformation = if (isPasswordVisible) VisualTransformation.None
+                else PasswordVisualTransformation()
             )
 
             Spacer(modifier = Modifier.height(32.dp))
