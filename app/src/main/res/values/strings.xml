@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">MeetingApp</string>
     <string name="office_location">Office Location</string>
     <string name="would_you_like_to_have_something_to_eat">Will you consume food today?</string>
@@ -18,5 +18,7 @@
     <string name="office">Office</string>
     <string name="city">City</string>
     <string name="continue_button">CONTINUE</string>
+    <string name="cancel_button" tools:ignore="ButtonCase">CANCEL</string>
     <string name="signature">Signature</string>
+    <string name="professional_designation">Professional Designation</string>
 </resources>

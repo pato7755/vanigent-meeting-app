@@ -36,13 +36,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vanigent.meetingapp.R
 import com.vanigent.meetingapp.domain.model.Address
 import com.vanigent.meetingapp.ui.common.SectionHeader
+import com.vanigent.meetingapp.ui.coordinatorlogin.components.ActionButton
 import com.vanigent.meetingapp.ui.coordinatorlogin.components.CameraStuff
-import com.vanigent.meetingapp.ui.coordinatorlogin.components.ContinueButton
 import com.vanigent.meetingapp.ui.coordinatorlogin.components.LabeledTextRow
 import com.vanigent.meetingapp.ui.coordinatorlogin.components.RadioButtons
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.ReceiptItem
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.SearchBarState
-import com.vanigent.meetingapp.ui.settings.ToggleableInfo
 import com.vanigent.meetingapp.util.Constants.SEVENTY_PERCENT
 import com.vanigent.meetingapp.util.Constants.THIRTY_PERCENT
 import timber.log.Timber
@@ -94,9 +93,11 @@ fun CoordinatorLoginScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        ContinueButton(
+                        ActionButton(
                             text = stringResource(R.string.continue_button),
-                            modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.CenterHorizontally),
                             onClick = { onContinueButtonPressed() }
                         )
 
