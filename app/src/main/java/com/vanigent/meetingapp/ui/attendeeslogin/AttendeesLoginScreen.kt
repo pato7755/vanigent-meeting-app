@@ -18,11 +18,17 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,157 +50,179 @@ import com.vanigent.meetingapp.ui.coordinatorlogin.components.ActionButton
 import com.vanigent.meetingapp.ui.coordinatorlogin.components.RadioButtons
 import com.vanigent.meetingapp.util.Constants.SEVENTY_PERCENT
 import com.vanigent.meetingapp.util.Constants.THIRTY_PERCENT
+import kotlinx.coroutines.launch
 
 @Composable
 fun AttendeesLoginScreen(
     viewModel: AttendeesLoginViewModel = hiltViewModel()
-
 ) {
-
     val firstNameState by viewModel.firstNameState.collectAsStateWithLifecycle()
     val lastNameState by viewModel.lastNameState.collectAsStateWithLifecycle()
     val pidState by viewModel.pidState.collectAsStateWithLifecycle()
-    val selectedProfessionalDesignation by viewModel.selectedDropdownOption.collectAsStateWithLifecycle()
     var isDialogVisible by remember { mutableStateOf(false) }
+    var showSnackbar by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
-    Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+    ) { paddingValues ->
 
-        LazyColumn(
-            modifier = Modifier.weight(SEVENTY_PERCENT)
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
 
-            item {
+            LazyColumn(
+                modifier = Modifier
+                    .weight(SEVENTY_PERCENT)
+                    .padding(paddingValues)
+            ) {
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                ) {
+                item {
 
-                    Card(
+                    Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        shape = RoundedCornerShape(size = 16.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
-                        colors = CardDefaults.cardColors(
-                            contentColor = colorResource(id = R.color.vanigent_light_green),
-                            containerColor = colorResource(id = R.color.white)
-                        )
+                            .fillMaxHeight()
                     ) {
-                        Column(
+
+                        Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp)
+                                .padding(8.dp),
+                            shape = RoundedCornerShape(size = 16.dp),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
+                            colors = CardDefaults.cardColors(
+                                contentColor = colorResource(id = R.color.vanigent_light_green),
+                                containerColor = colorResource(id = R.color.white)
+                            )
                         ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                            ) {
 
-                            Spacer(modifier = Modifier.height(16.dp))
+                                Spacer(modifier = Modifier.height(16.dp))
 
-                            ExposedDropdownMenu(
-                                optionsProvider = viewModel::fetchProfessionalDesignations,
-                                onOptionSelected = viewModel::updateDropdownSelectedOption
-                            )
+                                ExposedDropdownMenu(
+                                    optionsProvider = viewModel::fetchProfessionalDesignations,
+                                    onOptionSelected = viewModel::updateDropdownSelectedOption
+                                )
 
-                            Spacer(modifier = Modifier.height(16.dp))
+                                Spacer(modifier = Modifier.height(16.dp))
 
-                            OutlinedTextField(
-                                modifier = Modifier.fillMaxWidth(),
-                                label = { Text("Last Name") },
-                                value = lastNameState.lastName,
-                                singleLine = true,
-                                keyboardOptions = KeyboardOptions(
-                                    keyboardType = KeyboardType.Text,
-                                    capitalization = KeyboardCapitalization.Words
-                                ),
-                                onValueChange = {
-                                    viewModel.onLastNameTextChanged(it)
-                                }
-                            )
+                                OutlinedTextField(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    label = { Text("Last Name") },
+                                    value = lastNameState.lastName,
+                                    singleLine = true,
+                                    keyboardOptions = KeyboardOptions(
+                                        keyboardType = KeyboardType.Text,
+                                        capitalization = KeyboardCapitalization.Words
+                                    ),
+                                    onValueChange = {
+                                        viewModel.onLastNameTextChanged(it)
+                                    }
+                                )
 
-                            OutlinedTextField(
-                                modifier = Modifier.fillMaxWidth(),
-                                label = { Text("First Name") },
-                                value = firstNameState.firstName,
-                                singleLine = true,
-                                keyboardOptions = KeyboardOptions(
-                                    keyboardType = KeyboardType.Text,
-                                    capitalization = KeyboardCapitalization.Words
-                                ),
-                                onValueChange = {
-                                    viewModel.onFirstNameTextChanged(it)
-                                }
-                            )
+                                OutlinedTextField(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    label = { Text("First Name") },
+                                    value = firstNameState.firstName,
+                                    singleLine = true,
+                                    keyboardOptions = KeyboardOptions(
+                                        keyboardType = KeyboardType.Text,
+                                        capitalization = KeyboardCapitalization.Words
+                                    ),
+                                    onValueChange = {
+                                        viewModel.onFirstNameTextChanged(it)
+                                    }
+                                )
 
-                            OutlinedTextField(
-                                modifier = Modifier.fillMaxWidth(),
-                                label = { Text("PID") },
-                                value = pidState.pId,
-                                singleLine = true,
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                onValueChange = {
-                                    viewModel.onPidTextChanged(it)
-                                }
-                            )
+                                OutlinedTextField(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    label = { Text("PID") },
+                                    value = pidState.pId,
+                                    singleLine = true,
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    onValueChange = {
+                                        viewModel.onPidTextChanged(it)
+                                    }
+                                )
 
-                            Spacer(modifier = Modifier.height(16.dp))
+                                Spacer(modifier = Modifier.height(16.dp))
 
-                            Text(
-                                text = stringResource(id = R.string.would_you_like_to_have_something_to_eat),
-                                style = MaterialTheme.typography.bodyLarge
-                            )
+                                Text(
+                                    text = stringResource(id = R.string.would_you_like_to_have_something_to_eat),
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
 
-                            RadioButtons()
+                                RadioButtons()
 
-                            Spacer(modifier = Modifier.height(16.dp))
+                                Spacer(modifier = Modifier.height(16.dp))
 
 
+                            }
                         }
-                    }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                    if (isDialogVisible) {
-                        PasswordDialog(
-                            onDismiss = {
-                                isDialogVisible = !isDialogVisible
-                            },
-                            onConfirmation = {
-                                isDialogVisible = !isDialogVisible
-                            },
-                            passwordText = "",
-                            modifier = Modifier.background(
-                                color = Color.White
+                        if (isDialogVisible) {
+                            PasswordDialog(
+                                onDismiss = {
+                                    isDialogVisible = !isDialogVisible
+                                },
+                                onConfirmation = {
+                                    isDialogVisible = !isDialogVisible
+                                    showSnackbar = !showSnackbar
+                                },
+                                passwordText = "",
+                                modifier = Modifier.background(
+                                    color = Color.White
+                                )
                             )
+                        }
+
+                        ActionButton(
+                            text = stringResource(R.string.continue_button),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.CenterHorizontally),
+                            onClick = {
+                                isDialogVisible = !isDialogVisible
+                            }
                         )
+
                     }
-
-                    ActionButton(
-                        text = stringResource(R.string.continue_button),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.CenterHorizontally),
-                        onClick = {
-                            isDialogVisible = !isDialogVisible
+                    if (showSnackbar) {
+                        val snackbarMessage = stringResource(R.string.attendees_welcome_text)
+                        LaunchedEffect(Unit) {
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = snackbarMessage,
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
                         }
-                    )
-
+                        showSnackbar = !showSnackbar
+                    }
                 }
+
             }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Column(
+                modifier = Modifier
+                    .weight(THIRTY_PERCENT)
+                    .fillMaxWidth()
+            ) {
+                SignatureSection()
+            }
+
         }
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Column(
-            modifier = Modifier
-                .weight(THIRTY_PERCENT)
-                .fillMaxWidth()
-        ) {
-            SignatureSection()
-        }
-
     }
 }
 

@@ -118,7 +118,7 @@ fun PasswordDialog(
                     ActionButton(
                         text = stringResource(id = R.string.cancel_button),
                         modifier = Modifier,
-                        onClick = {},
+                        onClick = onDismiss,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Transparent,
                             contentColor = colorResource(id = R.color.vanigent_light_green)
@@ -131,7 +131,7 @@ fun PasswordDialog(
                     ActionButton(
                         text = stringResource(id = R.string.continue_button),
                         modifier = Modifier,
-                        onClick = {},
+                        onClick = onConfirmation,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Transparent,
                             contentColor = colorResource(id = R.color.vanigent_light_green)
