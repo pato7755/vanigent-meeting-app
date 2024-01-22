@@ -26,10 +26,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -59,8 +57,8 @@ fun AttendeesLoginScreen(
     val firstNameState by viewModel.firstNameState.collectAsStateWithLifecycle()
     val lastNameState by viewModel.lastNameState.collectAsStateWithLifecycle()
     val pidState by viewModel.pidState.collectAsStateWithLifecycle()
-    var isDialogVisible by remember { mutableStateOf(false) }
-    var showSnackbar by remember { mutableStateOf(false) }
+    val dialogState by viewModel.dialogVisibility.collectAsStateWithLifecycle()
+    val snackbarState by viewModel.snackbarVisibility.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
@@ -124,7 +122,8 @@ fun AttendeesLoginScreen(
                                     ),
                                     onValueChange = {
                                         viewModel.onLastNameTextChanged(it)
-                                    }
+                                    },
+                                    isError = lastNameState.isValid?.not() == true
                                 )
 
                                 OutlinedTextField(
@@ -138,7 +137,8 @@ fun AttendeesLoginScreen(
                                     ),
                                     onValueChange = {
                                         viewModel.onFirstNameTextChanged(it)
-                                    }
+                                    },
+                                    isError = firstNameState.isValid?.not() == true
                                 )
 
                                 OutlinedTextField(
@@ -149,7 +149,8 @@ fun AttendeesLoginScreen(
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                     onValueChange = {
                                         viewModel.onPidTextChanged(it)
-                                    }
+                                    },
+                                    isError = pidState.isValid?.not() == true
                                 )
 
                                 Spacer(modifier = Modifier.height(16.dp))
@@ -169,14 +170,13 @@ fun AttendeesLoginScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        if (isDialogVisible) {
+                        if (dialogState.isVisible) {
                             PasswordDialog(
                                 onDismiss = {
-                                    isDialogVisible = !isDialogVisible
+                                    viewModel.toggleDialogVisibility()
                                 },
                                 onConfirmation = {
-                                    isDialogVisible = !isDialogVisible
-                                    showSnackbar = !showSnackbar
+                                    viewModel.toggleDialogVisibility()
                                 },
                                 passwordText = "",
                                 modifier = Modifier.background(
@@ -191,12 +191,12 @@ fun AttendeesLoginScreen(
                                 .fillMaxWidth()
                                 .align(Alignment.CenterHorizontally),
                             onClick = {
-                                isDialogVisible = !isDialogVisible
+                                viewModel.performFieldValidations()
                             }
                         )
 
                     }
-                    if (showSnackbar) {
+                    if (snackbarState.isVisible) {
                         val snackbarMessage = stringResource(R.string.attendees_welcome_text)
                         LaunchedEffect(Unit) {
                             coroutineScope.launch {
@@ -206,8 +206,9 @@ fun AttendeesLoginScreen(
                                 )
                             }
                         }
-                        showSnackbar = !showSnackbar
+                        viewModel.toggleSnackbarVisibility()
                     }
+
                 }
 
             }
