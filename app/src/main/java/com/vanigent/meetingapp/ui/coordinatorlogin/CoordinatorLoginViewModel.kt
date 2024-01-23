@@ -87,10 +87,6 @@ class CoordinatorLoginViewModel @Inject constructor() : ViewModel() {
     }
 
     fun updateReceiptDetails(extractedText: MutableMap<String, String>, bitmap: Bitmap) {
-        Timber.e("call updateReceiptDetails")
-        extractedText.map {
-            Timber.e("extractedText VM:\n ${it.key} - ${it.value}")
-        }
 
         _extractedTextState.update { state ->
             val newMap = state.mapOfStrings.toMutableMap().apply { putAll(extractedText) }
@@ -112,5 +108,23 @@ class CoordinatorLoginViewModel @Inject constructor() : ViewModel() {
                 receiptItems = updatedReceiptItems
             )
         }
+    }
+
+    fun removeReceiptImage() {
+        // Remove the last item from mapOfStrings
+        _extractedTextState.value.mapOfStrings.remove(_extractedTextState.value.mapOfStrings.keys.last())
+
+        // Subtract 1 from the receipt number
+        val updatedReceiptNumber = _extractedTextState.value.receiptNumber - 1
+
+        // Remove the last item from receiptItems
+        val updatedReceiptItems = _extractedTextState.value.receiptItems.dropLast(1)
+
+        // Update the ExtractedTextState with the modified values
+        _extractedTextState.value = _extractedTextState.value.copy(
+            receiptNumber = updatedReceiptNumber,
+            mapOfStrings = _extractedTextState.value.mapOfStrings.toMutableMap(),
+            receiptItems = updatedReceiptItems
+        )
     }
 }

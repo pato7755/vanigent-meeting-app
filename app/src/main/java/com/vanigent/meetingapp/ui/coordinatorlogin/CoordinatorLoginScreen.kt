@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.CameraAlt
@@ -27,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -128,7 +130,8 @@ fun CoordinatorLoginScreen(
 
 @Composable
 fun ReceiptDetailsCard(
-    receiptItem: ReceiptItem
+    receiptItem: ReceiptItem,
+    viewModel: CoordinatorLoginViewModel = hiltViewModel()
 ) {
     Card(
         modifier = Modifier
@@ -157,6 +160,16 @@ fun ReceiptDetailsCard(
                     .height(250.dp)
             ) {
                 receiptItem.bitmap?.asImageBitmap()?.let {
+                    IconButton(
+                        onClick = { viewModel.removeReceiptImage() },
+                        modifier = Modifier.align(Alignment.TopEnd)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close button",
+                            tint = Color.DarkGray
+                        )
+                    }
                     Image(
                         bitmap = it,
                         contentDescription = null,
@@ -165,6 +178,7 @@ fun ReceiptDetailsCard(
                             .background(Color.White.copy(alpha = 0.7f))
                             .padding(16.dp)
                     )
+
                 }
             }
         }
