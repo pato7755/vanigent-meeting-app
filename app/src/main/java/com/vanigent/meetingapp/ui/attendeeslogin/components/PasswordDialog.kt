@@ -48,6 +48,7 @@ fun PasswordDialog(
     onDismiss: () -> Unit,
     onConfirmation: () -> Unit,
     passwordText: String,
+    onPasswordTextChanged: (String) -> Unit,
     modifier: Modifier,
 ) {
     var isPasswordVisible by remember { mutableStateOf(false) }
@@ -102,8 +103,8 @@ fun PasswordDialog(
                     },
                     trailingIcon = trailingIcon,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    onValueChange = { /*newPassword ->*/
-//                        viewModel.onPasswordTextChanged(newPassword)
+                    onValueChange = { newPassword ->
+                        onPasswordTextChanged(newPassword)
                     },
                     visualTransformation = if (isPasswordVisible) VisualTransformation.None
                     else PasswordVisualTransformation()
@@ -155,7 +156,8 @@ fun MediumSizedTablet() {
         onDismiss = {},
         onConfirmation = {},
         modifier = Modifier,
-        passwordText = ""
+        passwordText = "",
+        onPasswordTextChanged = {}
     )
 }
 
@@ -170,7 +172,8 @@ fun ExpandedSizedTablet() {
         onDismiss = {},
         onConfirmation = {},
         modifier = Modifier,
-        passwordText = ""
+        passwordText = "",
+        onPasswordTextChanged = {}
     )
 }
 
