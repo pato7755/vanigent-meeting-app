@@ -2,6 +2,7 @@ package com.vanigent.meetingapp.ui.attendeeslogin
 
 import androidx.lifecycle.ViewModel
 import com.vanigent.meetingapp.domain.repository.MeetingRepository
+import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.DialogPasswordState
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.DialogState
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.FirstNameState
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.LastNameState
@@ -36,6 +37,12 @@ class AttendeesLoginViewModel @Inject constructor(
 
     private val _snackbarVisibility = MutableStateFlow(SnackbarState(false))
     val snackbarVisibility = _snackbarVisibility.asStateFlow()
+
+    private val _isFormBlankState = MutableStateFlow(true)
+    val isFormBlankState = _isFormBlankState
+
+    private val _dialogPassword = MutableStateFlow(DialogPasswordState())
+    val dialogPassword = _dialogPassword.asStateFlow()
 
 
     fun onFirstNameTextChanged(text: String) {
@@ -85,6 +92,20 @@ class AttendeesLoginViewModel @Inject constructor(
         Timber.e("_snackbarVisibility.value.isVisible - ${_snackbarVisibility.value.isVisible}")
     }
 
+    fun onPasswordTextChanged(text: String) {
+        _dialogPassword.update { state ->
+            state.copy(
+                password = text
+            )
+        }
+    }
+
+    private fun updateIsFormBlank(isFormBlank: Boolean) {
+        _isFormBlankState.update {
+            isFormBlank
+        }
+    }
+
     fun performFieldValidations() {
 
         val isFirstNameValid = isNameValid(_firstName.value.firstName)
@@ -107,12 +128,27 @@ class AttendeesLoginViewModel @Inject constructor(
 
         val isFormValid = isFirstNameValid && isLastNameValid && isPidValid
 
-        if (isFormValid) {
-            // Save entries and clear form
-            toggleSnackbarVisibility()
-        } else if (!isFirstNameValid && !isLastNameValid && !isPidValid) {
-            // Ask coordinator to enter password
-            toggleDialogVisibility()
+        /**
+         * if isFormValid is true, it means all fields have been filled in properly with the right data formats.
+         * Set _isFormBlankState to true, show snackbar to welcome attendee, save data and clear form
+         * if isFormBlank is false, either one or more entries haven't been made or have the wrong format
+         *
+         * if isFormBlank is true, it means a number of attendees have already signed in.
+         * We then set _isFormBlankState to true, show passwordDialog, and navigate if password is correct.
+         *
+         * if isFormValid and isFormBlank are false, set _isFormBlankState to false so that isError for the text
+         * fields takes effect.
+         */
+        when {
+            isFormValid -> {
+                updateIsFormBlank(false)
+                toggleSnackbarVisibility()
+            }
+            isFormBlank() -> {
+                updateIsFormBlank(true)
+                toggleDialogVisibility()
+            }
+            else -> updateIsFormBlank(false)
         }
 
     }
@@ -127,6 +163,16 @@ class AttendeesLoginViewModel @Inject constructor(
 
     private fun isFormBlank(): Boolean {
         return _firstName.value.firstName.isBlank() && _lastName.value.lastName.isBlank() && _pid.value.pId.isBlank()
+    }
+
+    fun clearForm() {
+        updateDropdownSelectedOption("")
+        updateIsFormBlank(true)
+        _firstName.value = FirstNameState()
+        _lastName.value = LastNameState()
+        _pid.value = PIDState()
+
+//        debugFunction()
     }
 
 

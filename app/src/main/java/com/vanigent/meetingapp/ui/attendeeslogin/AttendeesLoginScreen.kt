@@ -57,10 +57,13 @@ fun AttendeesLoginScreen(
     val firstNameState by viewModel.firstNameState.collectAsStateWithLifecycle()
     val lastNameState by viewModel.lastNameState.collectAsStateWithLifecycle()
     val pidState by viewModel.pidState.collectAsStateWithLifecycle()
+    val selectedDropdownOption by viewModel.selectedDropdownOption.collectAsStateWithLifecycle()
     val dialogState by viewModel.dialogVisibility.collectAsStateWithLifecycle()
     val snackbarState by viewModel.snackbarVisibility.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+    val isFormBlank by viewModel.isFormBlankState.collectAsStateWithLifecycle()
+    val dialogPassword by viewModel.dialogPassword.collectAsStateWithLifecycle()
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
@@ -105,6 +108,7 @@ fun AttendeesLoginScreen(
                                 Spacer(modifier = Modifier.height(16.dp))
 
                                 ExposedDropdownMenu(
+                                    selectedOption = selectedDropdownOption,
                                     optionsProvider = viewModel::fetchProfessionalDesignations,
                                     onOptionSelected = viewModel::updateDropdownSelectedOption
                                 )
@@ -123,7 +127,8 @@ fun AttendeesLoginScreen(
                                     onValueChange = {
                                         viewModel.onLastNameTextChanged(it)
                                     },
-                                    isError = lastNameState.isValid?.not() == true
+                                    isError = if (isFormBlank) false
+                                    else lastNameState.isValid?.not() == true
                                 )
 
                                 OutlinedTextField(
@@ -138,7 +143,8 @@ fun AttendeesLoginScreen(
                                     onValueChange = {
                                         viewModel.onFirstNameTextChanged(it)
                                     },
-                                    isError = firstNameState.isValid?.not() == true
+                                    isError = if (isFormBlank) false
+                                    else firstNameState.isValid?.not() == true
                                 )
 
                                 OutlinedTextField(
@@ -150,7 +156,8 @@ fun AttendeesLoginScreen(
                                     onValueChange = {
                                         viewModel.onPidTextChanged(it)
                                     },
-                                    isError = pidState.isValid?.not() == true
+                                    isError = if (isFormBlank) false
+                                    else pidState.isValid?.not() == true
                                 )
 
                                 Spacer(modifier = Modifier.height(16.dp))
@@ -178,10 +185,12 @@ fun AttendeesLoginScreen(
                                 onConfirmation = {
                                     viewModel.toggleDialogVisibility()
                                 },
-                                passwordText = "",
+                                passwordText = dialogPassword.password,
                                 modifier = Modifier.background(
                                     color = Color.White
-                                )
+                                ),
+                                onPasswordTextChanged = viewModel::onPasswordTextChanged
+
                             )
                         }
 
@@ -206,6 +215,7 @@ fun AttendeesLoginScreen(
                                 )
                             }
                         }
+                        viewModel.clearForm()
                         viewModel.toggleSnackbarVisibility()
                     }
 

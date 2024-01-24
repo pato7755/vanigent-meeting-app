@@ -1,6 +1,5 @@
 package com.vanigent.meetingapp.ui.attendeeslogin.components
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.DropdownMenuItem
@@ -23,13 +22,12 @@ import com.vanigent.meetingapp.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExposedDropdownMenu(
+    selectedOption: String,
     optionsProvider: () -> List<String>,
     onOptionSelected: (String) -> Unit
 ) {
 
     var expanded by remember { mutableStateOf(false) }
-    var selectedOption by remember { mutableStateOf("") }
-    val context = LocalContext.current
 
     Box(
         modifier = Modifier
@@ -45,11 +43,7 @@ fun ExposedDropdownMenu(
                 label = { Text(text = stringResource(R.string.professional_designation)) },
                 readOnly = true,
                 trailingIcon = { TrailingIcon(expanded = expanded) },
-                colors = ExposedDropdownMenuDefaults.textFieldColors(
-//                    focusedTextColor = colorResource(id = R.color.vanigent_light_green),
-//                    unfocusedTextColor = Color.Transparent,
-
-                ),
+                colors = ExposedDropdownMenuDefaults.textFieldColors(),
                 modifier = Modifier.menuAnchor()
             )
 
@@ -61,10 +55,8 @@ fun ExposedDropdownMenu(
                     DropdownMenuItem(
                         text = { Text(text = item) },
                         onClick = {
-                            selectedOption = item
-                            onOptionSelected(selectedOption)
+                            onOptionSelected(item)
                             expanded = false
-                            Toast.makeText(context, item, Toast.LENGTH_SHORT).show()
                         }
                     )
                 }
