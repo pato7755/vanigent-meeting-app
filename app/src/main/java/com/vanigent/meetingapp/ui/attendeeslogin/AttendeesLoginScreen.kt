@@ -42,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vanigent.meetingapp.R
 import com.vanigent.meetingapp.ui.attendeeslogin.components.DrawingCanvas
 import com.vanigent.meetingapp.ui.attendeeslogin.components.ExposedDropdownMenu
+import com.vanigent.meetingapp.ui.attendeeslogin.components.Line
 import com.vanigent.meetingapp.ui.attendeeslogin.components.PasswordDialog
 import com.vanigent.meetingapp.ui.common.SectionHeader
 import com.vanigent.meetingapp.ui.coordinatorlogin.components.ActionButton
@@ -58,6 +59,7 @@ fun AttendeesLoginScreen(
     val lastNameState by viewModel.lastNameState.collectAsStateWithLifecycle()
     val pidState by viewModel.pidState.collectAsStateWithLifecycle()
     val selectedDropdownOption by viewModel.selectedDropdownOption.collectAsStateWithLifecycle()
+    val signatureLines by viewModel.signatureLines.collectAsStateWithLifecycle()
     val dialogState by viewModel.dialogVisibility.collectAsStateWithLifecycle()
     val snackbarState by viewModel.snackbarVisibility.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -230,7 +232,9 @@ fun AttendeesLoginScreen(
                     .weight(THIRTY_PERCENT)
                     .fillMaxWidth()
             ) {
-                SignatureSection()
+                SignatureSection(
+                    lines = signatureLines
+                )
             }
 
         }
@@ -238,7 +242,9 @@ fun AttendeesLoginScreen(
 }
 
 @Composable
-fun SignatureSection() {
+fun SignatureSection(
+    lines: List<Line>
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -250,7 +256,9 @@ fun SignatureSection() {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        DrawingCanvas()
+        DrawingCanvas(
+            lines = lines
+        )
 
     }
 

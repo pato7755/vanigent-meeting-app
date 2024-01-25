@@ -165,12 +165,24 @@ class AttendeesLoginViewModel @Inject constructor(
         return _firstName.value.firstName.isBlank() && _lastName.value.lastName.isBlank() && _pid.value.pId.isBlank()
     }
 
+    fun addLine(line: Line) {
+        _signatureLines.update { lines ->
+            lines + line
+        }
+    }
+
+    private fun clearCanvas() {
+        _signatureLines.value = emptyList()
+    }
+
+
     fun clearForm() {
         updateDropdownSelectedOption("")
         updateIsFormBlank(true)
         _firstName.value = FirstNameState()
         _lastName.value = LastNameState()
         _pid.value = PIDState()
+        clearCanvas()
 
 //        debugFunction()
     }
