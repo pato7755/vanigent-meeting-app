@@ -1,18 +1,21 @@
 package com.vanigent.meetingapp.ui.attendeeslogin
 
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import com.vanigent.meetingapp.domain.repository.MeetingRepository
+import com.vanigent.meetingapp.ui.attendeeslogin.components.Line
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.DialogPasswordState
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.DialogState
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.FirstNameState
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.LastNameState
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.PIDState
+import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.SignatureState
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.SnackbarState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -43,6 +46,12 @@ class AttendeesLoginViewModel @Inject constructor(
 
     private val _dialogPassword = MutableStateFlow(DialogPasswordState())
     val dialogPassword = _dialogPassword.asStateFlow()
+
+    private val _signatureLines = mutableStateListOf<Line>()
+    val signatureLines = _signatureLines
+
+    private val _signatureBitmap = MutableStateFlow(SignatureState(null, mutableListOf()))
+    val signatureBitmap = _signatureBitmap.asStateFlow()
 
 
     fun onFirstNameTextChanged(text: String) {
@@ -89,7 +98,6 @@ class AttendeesLoginViewModel @Inject constructor(
                 isVisible = !state.isVisible
             )
         }
-        Timber.e("_snackbarVisibility.value.isVisible - ${_snackbarVisibility.value.isVisible}")
     }
 
     fun onPasswordTextChanged(text: String) {
@@ -144,10 +152,12 @@ class AttendeesLoginViewModel @Inject constructor(
                 updateIsFormBlank(false)
                 toggleSnackbarVisibility()
             }
+
             isFormBlank() -> {
                 updateIsFormBlank(true)
                 toggleDialogVisibility()
             }
+
             else -> updateIsFormBlank(false)
         }
 
@@ -165,26 +175,30 @@ class AttendeesLoginViewModel @Inject constructor(
         return _firstName.value.firstName.isBlank() && _lastName.value.lastName.isBlank() && _pid.value.pId.isBlank()
     }
 
-    fun addLine(line: Line) {
-        _signatureLines.update { lines ->
-            lines + line
+    fun updateSignature(bitmap: ImageBitmap) {
+        _signatureBitmap.update { state ->
+            state.copy(
+                bitmap = bitmap
+            )
         }
     }
 
-    private fun clearCanvas() {
-        _signatureLines.value = emptyList()
+    fun updateSignatureLines(newLines: MutableList<Line>) {
+        _signatureLines.addAll(newLines)
     }
 
+    private fun clearCanvas() {
+        _signatureBitmap.value = SignatureState(bitmap = null, mutableListOf())
+        _signatureLines.clear()
+    }
 
     fun clearForm() {
         updateDropdownSelectedOption("")
         updateIsFormBlank(true)
+        clearCanvas()
         _firstName.value = FirstNameState()
         _lastName.value = LastNameState()
         _pid.value = PIDState()
-        clearCanvas()
-
-//        debugFunction()
     }
 
 

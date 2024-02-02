@@ -28,9 +28,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -59,7 +61,8 @@ fun AttendeesLoginScreen(
     val lastNameState by viewModel.lastNameState.collectAsStateWithLifecycle()
     val pidState by viewModel.pidState.collectAsStateWithLifecycle()
     val selectedDropdownOption by viewModel.selectedDropdownOption.collectAsStateWithLifecycle()
-    val signatureLines by viewModel.signatureLines.collectAsStateWithLifecycle()
+    val signatureLines = viewModel.signatureLines
+    val signatureBitmap by viewModel.signatureBitmap.collectAsStateWithLifecycle()
     val dialogState by viewModel.dialogVisibility.collectAsStateWithLifecycle()
     val snackbarState by viewModel.snackbarVisibility.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -203,6 +206,7 @@ fun AttendeesLoginScreen(
                                 .align(Alignment.CenterHorizontally),
                             onClick = {
                                 viewModel.performFieldValidations()
+
                             }
                         )
 
@@ -233,7 +237,10 @@ fun AttendeesLoginScreen(
                     .fillMaxWidth()
             ) {
                 SignatureSection(
-                    lines = signatureLines
+                    lines = signatureLines,
+                    onSignatureChanged = viewModel::updateSignatureLines,
+                    signatureBitmap = signatureBitmap.bitmap,
+                    onSubmitButtonPressed = { viewModel.updateSignature(it) }
                 )
             }
 
@@ -243,7 +250,10 @@ fun AttendeesLoginScreen(
 
 @Composable
 fun SignatureSection(
-    lines: List<Line>
+    lines: SnapshotStateList<Line>,
+    signatureBitmap: ImageBitmap?,
+    onSignatureChanged: (MutableList<Line>) -> Unit,
+    onSubmitButtonPressed: (ImageBitmap) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -257,7 +267,10 @@ fun SignatureSection(
         Spacer(modifier = Modifier.height(8.dp))
 
         DrawingCanvas(
-            lines = lines
+            lines = lines,
+            onSignatureChanged = { onSignatureChanged },
+            signatureBitmap = signatureBitmap,
+            onSubmitButtonPressed = onSubmitButtonPressed
         )
 
     }

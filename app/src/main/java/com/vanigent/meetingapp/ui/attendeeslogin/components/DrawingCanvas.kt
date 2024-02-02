@@ -3,46 +3,68 @@ package com.vanigent.meetingapp.ui.attendeeslogin.components
 import android.graphics.Bitmap
 import android.graphics.Paint
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.vanigent.meetingapp.util.Constants.FIVE_HUNDRED
 
 
 @Composable
 fun DrawingCanvas(
-    lines: List<Line>,
+    lines: SnapshotStateList<Line>,
+    signatureBitmap: ImageBitmap?,
+    onSignatureChanged: (List<Line>) -> Unit,
+    onSubmitButtonPressed: (ImageBitmap) -> Unit
 ) {
-    Box(
+
+    val rememberedLines = rememberUpdatedState(lines)
+
+    Canvas(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
-    ) {
-        Canvas(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-        ) {
-            lines.forEach { line ->
-                drawLine(
-                    color = line.color,
-                    start = line.start,
-                    end = line.end,
-                    strokeWidth = line.strokeWidth.toPx(),
-                    cap = StrokeCap.Round
-                )
+            .pointerInput(true) {
+                detectDragGestures { change, dragAmount ->
+                    change.consume()
+
+                    val line = Line(
+                        start = change.position - dragAmount,
+                        end = change.position
+                    )
+
+                    rememberedLines.value.add(line)
+
+                    onSignatureChanged(rememberedLines.value)
+                }
             }
+    ) {
+        lines.forEach { line ->
+            drawLine(
+                color = line.color,
+                start = line.start,
+                end = line.end,
+                strokeWidth = line.strokeWidth.toPx(),
+                cap = StrokeCap.Round
+            )
         }
     }
+
+    val width = FIVE_HUNDRED
+    val height = FIVE_HUNDRED
+
+    val bitmap = signatureBitmap ?: LinesToBitmap(rememberedLines.value, width, height)
+    onSubmitButtonPressed(bitmap)
 }
 
 @Composable
