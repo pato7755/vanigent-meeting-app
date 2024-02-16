@@ -1,5 +1,7 @@
 package com.vanigent.meetingapp.di
 
+import com.vanigent.meetingapp.data.MeetingDao
+import com.vanigent.meetingapp.data.MeetingDatabase
 import com.vanigent.meetingapp.data.repository.MeetingRepositoryImpl
 import com.vanigent.meetingapp.domain.repository.MeetingRepository
 import dagger.Module
@@ -14,6 +16,7 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun providesMeetingRepository(): MeetingRepository = MeetingRepositoryImpl()
+    fun providesMeetingRepository(dao: MeetingDao, database: MeetingDatabase): MeetingRepository =
+        MeetingRepositoryImpl(dao, database)
 
 }
