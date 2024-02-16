@@ -24,11 +24,8 @@ object MeetingMapper {
             },
             receipts = meeting.receipt.map {
                 ReceiptEntity(
-                    image = it.image,
-                    vendorName = it.vendorName,
-                    amount = it.amount,
-                    caterer = it.caterer,
-                    date = it.date
+                    receiptImage = it.receiptImage,
+                    receiptItems = it.receiptItems
                 )
             }
         )
@@ -50,11 +47,8 @@ object MeetingMapper {
             },
             receipt = meetingEntity.receipts.map {
                 Receipt(
-                    image = it.image,
-                    vendorName = it.vendorName,
-                    amount = it.amount,
-                    caterer = it.caterer,
-                    date = it.date
+                    receiptImage = it.receiptImage,
+                    receiptItems = it.receiptItems
                 )
             }
         )

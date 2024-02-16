@@ -17,9 +17,6 @@ data class Attendee(
 )
 
 data class Receipt(
-    val image: ByteArray,
-    val vendorName: String,
-    val amount: String,
-    val caterer: String,
-    val date: String,
+    val receiptItems: MutableMap<String, String>,
+    val receiptImage: String? = null
 )

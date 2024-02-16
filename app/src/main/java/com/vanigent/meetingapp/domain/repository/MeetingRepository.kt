@@ -11,7 +11,7 @@ interface MeetingRepository {
 
     fun getProfessionalDesignations(): List<String>
 
-    suspend fun saveMeeting(meeting: Meeting)
+    suspend fun saveMeeting(meeting: Meeting): Long
 
     suspend fun addAttendeeToMeeting(meetingId: Long, attendee: Attendee)
 

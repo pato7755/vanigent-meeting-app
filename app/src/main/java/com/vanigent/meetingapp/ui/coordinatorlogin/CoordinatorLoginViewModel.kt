@@ -4,20 +4,30 @@ import android.graphics.Bitmap
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.vanigent.meetingapp.data.local.converters.BitmapConverter
 import com.vanigent.meetingapp.domain.model.Address
+import com.vanigent.meetingapp.domain.model.Meeting
+import com.vanigent.meetingapp.domain.model.Receipt
 import com.vanigent.meetingapp.domain.model.SampleAddresses
+import com.vanigent.meetingapp.domain.usecase.SaveMeetingUseCase
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.BitmapState
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.ExtractedTextState
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.ReceiptItem
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.SearchBarState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class CoordinatorLoginViewModel @Inject constructor() : ViewModel() {
+class CoordinatorLoginViewModel @Inject constructor(
+    private val saveMeetingUseCase: SaveMeetingUseCase
+) : ViewModel() {
 
     private val _searchBarState = MutableStateFlow(SearchBarState())
     val searchBarState = _searchBarState.asStateFlow()
@@ -126,4 +136,44 @@ class CoordinatorLoginViewModel @Inject constructor() : ViewModel() {
             receiptItems = updatedReceiptItems
         )
     }
+
+    fun saveMeetingDetails(onMeetingIdReceived: (Long) -> Unit) {
+
+        val officeName = _searchBarState.value.searchString
+        viewModelScope.launch(Dispatchers.IO) {
+            val meetingId = saveMeetingUseCase.invoke(
+                meeting = Meeting(
+                    officeLocation = officeName ?: "",
+                    coordinatorWillConsumeFood = true,
+                    receipt = extractedTextStateToReceipts(_extractedTextState.value),
+                    attendee = listOf()
+                )
+            )
+            onMeetingIdReceived(meetingId)
+        }
+    }
+
+    private fun bitmapToBase64String(bitmap: Bitmap?): String? {
+        return bitmap?.let {
+            BitmapConverter.convertBitmapToString(it)
+        }
+    }
+
+    // Function to map ReceiptItem to Receipt
+    private fun mapReceiptItemToReceipt(receiptItem: ReceiptItem): Receipt {
+        val receiptImageByteArray = bitmapToBase64String(receiptItem.bitmap)
+        Timber.d("receiptImageByteArray - $receiptImageByteArray")
+        return Receipt(
+            receiptItems = receiptItem.mapOfStrings,
+            receiptImage = receiptImageByteArray
+        )
+    }
+
+    // Function to convert ExtractedTextState to List<Receipt>
+    private fun extractedTextStateToReceipts(extractedTextState: ExtractedTextState): List<Receipt> {
+        return extractedTextState.receiptItems.map { mapReceiptItemToReceipt(it) }
+    }
+
 }
+
+

@@ -41,8 +41,8 @@ class MeetingRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun saveMeeting(meeting: Meeting) {
-        dao.upsertMeeting(MeetingMapper.mapToEntity(meeting))
+    override suspend fun saveMeeting(meeting: Meeting): Long {
+        return dao.upsertMeeting(MeetingMapper.mapToEntity(meeting))
     }
 
     override suspend fun addAttendeeToMeeting(meetingId: Long, attendee: Attendee) {

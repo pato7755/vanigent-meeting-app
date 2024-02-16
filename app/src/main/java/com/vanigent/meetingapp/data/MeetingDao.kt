@@ -18,7 +18,7 @@ interface MeetingDao {
      * @param meeting
      */
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun upsertMeeting(meeting: MeetingEntity)
+    fun upsertMeeting(meeting: MeetingEntity): Long
 
     /**
      * Get meeting by id
