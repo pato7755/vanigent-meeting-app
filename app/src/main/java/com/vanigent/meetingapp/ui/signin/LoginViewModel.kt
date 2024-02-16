@@ -1,7 +1,7 @@
 package com.vanigent.meetingapp.ui.signin
 
-import androidx.compose.runtime.MutableState
 import androidx.lifecycle.ViewModel
+import com.vanigent.meetingapp.domain.repository.MeetingRepository
 import com.vanigent.meetingapp.ui.signin.stateholders.PasswordState
 import com.vanigent.meetingapp.ui.signin.stateholders.UsernameState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,7 +11,9 @@ import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
-class LoginViewModel @Inject constructor() : ViewModel() {
+class LoginViewModel @Inject constructor(
+    private val repository: MeetingRepository
+) : ViewModel() {
 
     private val _usernameState = MutableStateFlow(UsernameState())
     val usernameState = _usernameState.asStateFlow()
@@ -33,6 +35,10 @@ class LoginViewModel @Inject constructor() : ViewModel() {
                 password = text
             )
         }
+    }
+
+    fun onLoginClicked() {
+        repository.login()
     }
 
 

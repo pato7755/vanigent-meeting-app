@@ -1,9 +1,15 @@
 package com.vanigent.meetingapp.ui.attendeeslogin
 
+import android.graphics.Bitmap
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.vanigent.meetingapp.domain.model.Attendee
+import com.vanigent.meetingapp.domain.model.Meeting
 import com.vanigent.meetingapp.domain.repository.MeetingRepository
+import com.vanigent.meetingapp.domain.usecase.SaveAttendeeUseCase
 import com.vanigent.meetingapp.ui.attendeeslogin.components.Line
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.DialogPasswordState
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.DialogState
@@ -13,14 +19,18 @@ import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.PIDState
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.SignatureState
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.SnackbarState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
 @HiltViewModel
 class AttendeesLoginViewModel @Inject constructor(
-    private val meetingRepository: MeetingRepository
+    private val meetingRepository: MeetingRepository,
+    private val saveAttendeeUseCase: SaveAttendeeUseCase
 ) : ViewModel() {
 
     private val _selectedDropdownOption = MutableStateFlow("")
@@ -151,6 +161,7 @@ class AttendeesLoginViewModel @Inject constructor(
             isFormValid -> {
                 updateIsFormBlank(false)
                 toggleSnackbarVisibility()
+                saveMeetingDetails()
             }
 
             isFormBlank() -> {
@@ -201,5 +212,39 @@ class AttendeesLoginViewModel @Inject constructor(
         _pid.value = PIDState()
     }
 
+    private fun saveMeetingDetails() {
+        val firstName = _firstName.value.firstName
+        val lastName = _lastName.value.lastName
+        val pId = _pid.value.pId
+        val professionalDesignation = _selectedDropdownOption.value
+        val signatureBitmap = _signatureBitmap.value.bitmap?.asAndroidBitmap()
+
+        val signatureByteArray = signatureBitmap?.let {
+            ByteArrayOutputStream().apply {
+                it.compress(Bitmap.CompressFormat.PNG, 100, this)
+            }.toByteArray()
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            saveAttendeeUseCase.invoke(
+                meeting = Meeting(
+                    officeLocation = "Office",
+                    coordinatorWillConsumeFood = true,
+                    receipt = emptyList(),
+                    attendee = listOf(
+                        Attendee(
+                            attendeeFirstName = firstName,
+                            attendeePid = pId,
+                            attendeeLastName = lastName,
+                            attendeeWillConsumeFood = true,
+                            attendeeProfessionalDesignation = professionalDesignation,
+                            attendeeSignature = signatureByteArray ?: byteArrayOf()
+                        )
+                    )
+                )
+            )
+
+        }
+    }
 
 }

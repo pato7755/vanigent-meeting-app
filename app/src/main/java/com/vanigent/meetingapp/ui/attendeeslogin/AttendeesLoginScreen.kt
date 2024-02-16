@@ -55,7 +55,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun AttendeesLoginScreen(
-    viewModel: AttendeesLoginViewModel = hiltViewModel()
+    viewModel: AttendeesLoginViewModel = hiltViewModel(),
+    onContinueButtonPressed: () -> Unit
 ) {
     val firstNameState by viewModel.firstNameState.collectAsStateWithLifecycle()
     val lastNameState by viewModel.lastNameState.collectAsStateWithLifecycle()
@@ -189,6 +190,7 @@ fun AttendeesLoginScreen(
                                 },
                                 onConfirmation = {
                                     viewModel.toggleDialogVisibility()
+                                    onContinueButtonPressed()
                                 },
                                 passwordText = dialogPassword.password,
                                 modifier = Modifier.background(
@@ -285,7 +287,9 @@ fun SignatureSection(
     heightDp = 480
 )
 fun MediumSizedTablet() {
-    AttendeesLoginScreen()
+    AttendeesLoginScreen(
+        onContinueButtonPressed = {}
+    )
 }
 
 @Composable
@@ -295,6 +299,8 @@ fun MediumSizedTablet() {
     heightDp = 840
 )
 fun ExpandedSizedTablet() {
-    AttendeesLoginScreen()
+    AttendeesLoginScreen(
+        onContinueButtonPressed = {}
+    )
 }
 

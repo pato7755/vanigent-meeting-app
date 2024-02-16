@@ -53,7 +53,8 @@ import com.vanigent.meetingapp.util.Constants
 
 @Composable
 fun LoginScreen(
-    onLoginButtonClicked: () -> Unit
+    onLoginButtonClicked: () -> Unit,
+    viewModel: LoginViewModel = hiltViewModel()
 ) {
 
     Row(
@@ -65,7 +66,10 @@ fun LoginScreen(
                 .weight(1f)
         ) {
             LoginFormSection(
-                onLoginButtonClicked
+                {
+                    viewModel.onLoginClicked() // temporal function call
+                    onLoginButtonClicked()
+                }
             )
         }
 
