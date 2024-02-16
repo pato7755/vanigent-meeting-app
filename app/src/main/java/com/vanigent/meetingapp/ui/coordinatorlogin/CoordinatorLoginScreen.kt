@@ -50,8 +50,8 @@ import timber.log.Timber
 
 @Composable
 fun CoordinatorLoginScreen(
+    viewModel: CoordinatorLoginViewModel = hiltViewModel(),
     onContinueButtonPressed: () -> Unit,
-    viewModel: CoordinatorLoginViewModel = hiltViewModel()
 ) {
     val extractedTextState by viewModel.extractedTextState.collectAsStateWithLifecycle()
 
