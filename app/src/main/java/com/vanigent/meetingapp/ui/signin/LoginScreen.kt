@@ -67,7 +67,6 @@ fun LoginScreen(
         ) {
             LoginFormSection(
                 {
-                    viewModel.onLoginClicked() // temporal function call
                     onLoginButtonClicked()
                 }
             )

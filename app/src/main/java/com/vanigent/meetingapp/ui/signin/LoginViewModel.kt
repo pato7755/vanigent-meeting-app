@@ -21,6 +21,10 @@ class LoginViewModel @Inject constructor(
     private val _passwordState = MutableStateFlow(PasswordState())
     val passwordState = _passwordState.asStateFlow()
 
+    init {
+        repository.login()
+    }
+
     fun onUsernameTextChanged(text: String) {
         _usernameState.update { state ->
             state.copy(
@@ -36,10 +40,4 @@ class LoginViewModel @Inject constructor(
             )
         }
     }
-
-    fun onLoginClicked() {
-        repository.login()
-    }
-
-
 }
