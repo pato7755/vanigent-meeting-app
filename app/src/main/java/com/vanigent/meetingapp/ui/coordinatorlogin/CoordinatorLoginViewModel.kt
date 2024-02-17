@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -137,7 +138,7 @@ class CoordinatorLoginViewModel @Inject constructor(
         )
     }
 
-    fun saveMeetingDetails(onMeetingIdReceived: (Long) -> Unit) {
+    fun saveMeetingDetails(onMeetingIdReceived: (String) -> Unit) {
 
         val officeName = _searchBarState.value.searchString
         viewModelScope.launch(Dispatchers.IO) {
@@ -149,7 +150,9 @@ class CoordinatorLoginViewModel @Inject constructor(
                     attendee = listOf()
                 )
             )
-            onMeetingIdReceived(meetingId)
+            withContext(Dispatchers.Main) {
+                onMeetingIdReceived(meetingId.toString())
+            }
         }
     }
 

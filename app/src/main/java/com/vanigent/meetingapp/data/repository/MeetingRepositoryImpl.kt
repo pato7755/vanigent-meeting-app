@@ -3,6 +3,7 @@ package com.vanigent.meetingapp.data.repository
 import com.vanigent.meetingapp.common.WorkResult
 import com.vanigent.meetingapp.data.MeetingDao
 import com.vanigent.meetingapp.data.MeetingDatabase
+import com.vanigent.meetingapp.data.mapper.AttendeeMapper
 import com.vanigent.meetingapp.data.mapper.MeetingMapper
 import com.vanigent.meetingapp.domain.model.Attendee
 import com.vanigent.meetingapp.domain.model.Meeting
@@ -17,7 +18,6 @@ class MeetingRepositoryImpl @Inject constructor(
     private val database: MeetingDatabase
 ) : MeetingRepository {
     override fun login() {
-        // ("Not yet implemented")
         if (!database.isOpen) {
             Timber.d("Opening database...")
             database.openHelper.writableDatabase
@@ -42,11 +42,22 @@ class MeetingRepositoryImpl @Inject constructor(
     }
 
     override suspend fun saveMeeting(meeting: Meeting): Long {
-        return dao.upsertMeeting(MeetingMapper.mapToEntity(meeting))
+        return dao.insertMeeting(MeetingMapper.mapToEntity(meeting))
     }
 
     override suspend fun addAttendeeToMeeting(meetingId: Long, attendee: Attendee) {
-        TODO("Not yet implemented")
+        val meeting = dao.getMeetingById(meetingId.toString())
+        val updatedAttendee = meeting?.attendees?.toMutableList()?.apply {
+            add(AttendeeMapper.mapToEntity(attendee))
+        }
+
+        val updatedMeeting = updatedAttendee?.let {
+            meeting.copy(
+                attendees = it
+            )
+        }
+
+        updatedMeeting?.let { dao.updateMeeting(it) }
     }
 
     override suspend fun getMeetings(): Flow<WorkResult<List<Meeting>>> = flow {

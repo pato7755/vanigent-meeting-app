@@ -34,7 +34,7 @@ fun MainScreen() {
             )
         }
 
-        composable(route = "attendees_login") {
+        composable(route = "attendees_login/{meetingId}") {
             AttendeesLoginScreen(
                 onContinueButtonPressed = {
                     navController.navigate(route = "lazy_table_pinned_screen")

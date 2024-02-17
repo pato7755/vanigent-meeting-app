@@ -4,10 +4,10 @@ import android.graphics.Bitmap
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vanigent.meetingapp.domain.model.Attendee
-import com.vanigent.meetingapp.domain.model.Meeting
 import com.vanigent.meetingapp.domain.repository.MeetingRepository
 import com.vanigent.meetingapp.domain.usecase.SaveAttendeeUseCase
 import com.vanigent.meetingapp.ui.attendeeslogin.components.Line
@@ -24,14 +24,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
 @HiltViewModel
 class AttendeesLoginViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val meetingRepository: MeetingRepository,
     private val saveAttendeeUseCase: SaveAttendeeUseCase
 ) : ViewModel() {
+
+    private val meetingId = MutableStateFlow("")
 
     private val _selectedDropdownOption = MutableStateFlow("")
     val selectedDropdownOption = _selectedDropdownOption.asStateFlow()
@@ -63,6 +67,9 @@ class AttendeesLoginViewModel @Inject constructor(
     private val _signatureBitmap = MutableStateFlow(SignatureState(null, mutableListOf()))
     val signatureBitmap = _signatureBitmap.asStateFlow()
 
+    init {
+        meetingId.value = savedStateHandle.get<String>("meetingId") ?: ""
+    }
 
     fun onFirstNameTextChanged(text: String) {
         _firstName.update { state ->
@@ -161,7 +168,7 @@ class AttendeesLoginViewModel @Inject constructor(
             isFormValid -> {
                 updateIsFormBlank(false)
                 toggleSnackbarVisibility()
-                saveMeetingDetails()
+                saveAttendeeDetails()
             }
 
             isFormBlank() -> {
@@ -212,7 +219,7 @@ class AttendeesLoginViewModel @Inject constructor(
         _pid.value = PIDState()
     }
 
-    private fun saveMeetingDetails() {
+    private fun saveAttendeeDetails() {
         val firstName = _firstName.value.firstName
         val lastName = _lastName.value.lastName
         val pId = _pid.value.pId
@@ -227,24 +234,16 @@ class AttendeesLoginViewModel @Inject constructor(
 
         viewModelScope.launch(Dispatchers.IO) {
             saveAttendeeUseCase.invoke(
-                meeting = Meeting(
-                    officeLocation = "Office",
-                    coordinatorWillConsumeFood = true,
-                    receipt = emptyList(),
-                    attendee = listOf(
-                        Attendee(
-                            attendeeFirstName = firstName,
-                            attendeePid = pId,
-                            attendeeLastName = lastName,
-                            attendeeWillConsumeFood = true,
-                            attendeeProfessionalDesignation = professionalDesignation,
-                            attendeeSignature = signatureByteArray ?: byteArrayOf()
-                        )
-                    )
+                meetingId = meetingId.value.toLong(),
+                attendee = Attendee(
+                    attendeeFirstName = firstName,
+                    attendeePid = pId,
+                    attendeeLastName = lastName,
+                    attendeeWillConsumeFood = true,
+                    attendeeProfessionalDesignation = professionalDesignation,
+                    attendeeSignature = signatureByteArray ?: byteArrayOf()
                 )
             )
-
         }
     }
-
 }

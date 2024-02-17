@@ -18,7 +18,15 @@ interface MeetingDao {
      * @param meeting
      */
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun upsertMeeting(meeting: MeetingEntity): Long
+    fun insertMeeting(meeting: MeetingEntity): Long
+
+    /**
+     * Insert only attendee data into the meeting data
+     *
+     * @param meeting
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun updateMeeting(meeting: MeetingEntity)
 
     /**
      * Get meeting by id
