@@ -6,14 +6,14 @@ object ReceiptMapper {
     fun mapToEntity(receipt: ReceiptEntity): ReceiptEntity {
         return ReceiptEntity(
             receiptItems = receipt.receiptItems,
-            receiptImage = receipt.receiptImage
+            receiptImagePath = receipt.receiptImagePath
         )
     }
 
-    fun mapToDomain(receiptEntity: ReceiptEntity): com.vanigent.meetingapp.data.local.entity.ReceiptEntity {
+    fun mapToDomain(receiptEntity: ReceiptEntity): ReceiptEntity {
         return ReceiptEntity(
             receiptItems = receiptEntity.receiptItems,
-            receiptImage = receiptEntity.receiptImage
+            receiptImagePath = receiptEntity.receiptImagePath
         )
     }
 }

@@ -18,5 +18,5 @@ data class Attendee(
 
 data class Receipt(
     val receiptItems: MutableMap<String, String>,
-    val receiptImage: String? = null
+    val receiptImagePath: String? = null
 )

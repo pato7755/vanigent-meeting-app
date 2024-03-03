@@ -24,7 +24,7 @@ object MeetingMapper {
             },
             receipts = meeting.receipt.map {
                 ReceiptEntity(
-                    receiptImage = it.receiptImage,
+                    receiptImagePath = it.receiptImagePath,
                     receiptItems = it.receiptItems
                 )
             }
@@ -47,7 +47,30 @@ object MeetingMapper {
             },
             receipt = meetingEntity.receipts.map {
                 Receipt(
-                    receiptImage = it.receiptImage,
+                    receiptImagePath = it.receiptImagePath,
+                    receiptItems = it.receiptItems
+                )
+            }
+        )
+    }
+
+    fun mapToDomainWithoutImages(meetingEntity: MeetingEntity): Meeting {
+        return Meeting(
+            officeLocation = meetingEntity.officeLocation,
+            coordinatorWillConsumeFood = meetingEntity.coordinatorWillConsumeFood,
+            attendee = meetingEntity.attendees.map {
+                Attendee(
+                    attendeeFirstName = it.attendeeFirstName,
+                    attendeeLastName = it.attendeeLastName,
+                    attendeePid = it.attendeePid,
+                    attendeeWillConsumeFood = it.attendeeWillConsumeFood,
+                    attendeeProfessionalDesignation = it.attendeeProfessionalDesignation,
+                    attendeeSignature = it.attendeeSignature
+                )
+            },
+            receipt = meetingEntity.receipts.map {
+                Receipt(
+                    receiptImagePath = it.receiptImagePath,
                     receiptItems = it.receiptItems
                 )
             }

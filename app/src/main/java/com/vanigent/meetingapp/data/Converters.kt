@@ -26,8 +26,11 @@ class Converters {
     }
 
     @TypeConverter
-    fun toReceiptList(receiptString: String): List<ReceiptEntity> {
+    fun toReceiptList(receiptString: String?): List<ReceiptEntity> {
+        if (receiptString.isNullOrEmpty()) {
+            return emptyList()
+        }
         val listType = object : TypeToken<List<ReceiptEntity>>() {}.type
-        return gson.fromJson(receiptString, listType)
+        return gson.fromJson(receiptString, listType) ?: emptyList()
     }
 }

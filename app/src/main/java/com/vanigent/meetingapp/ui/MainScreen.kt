@@ -6,7 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.vanigent.meetingapp.ui.attendeeslogin.AttendeesLoginScreen
-import com.vanigent.meetingapp.ui.common.LazyTablePinnedScreen
+import com.vanigent.meetingapp.ui.attendeeslogout.AttendeesLogoutScreen
 import com.vanigent.meetingapp.ui.coordinatorlogin.CoordinatorLoginScreen
 import com.vanigent.meetingapp.ui.signin.LoginScreen
 
@@ -35,17 +35,13 @@ fun MainScreen() {
         composable(route = "attendees_login/{meetingId}") {
             AttendeesLoginScreen(
                 onContinueButtonPressed = {
-                    navController.navigate(route = "lazy_table_pinned_screen")
+                    navController.navigate(route = "attendees_logout")
                 }
             )
         }
 
-        composable(route = "lazy_table_pinned_screen") {
-            LazyTablePinnedScreen(
-                onBackClick = {
-                    navController.navigate(route = "attendees_login")
-                }
-            )
+        composable(route = "attendees_logout") {
+            AttendeesLogoutScreen()
         }
 
     }

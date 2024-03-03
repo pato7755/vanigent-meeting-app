@@ -1,11 +1,11 @@
 package com.vanigent.meetingapp.ui.coordinatorlogin
 
+import android.content.Context
 import android.graphics.Bitmap
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.vanigent.meetingapp.data.local.converters.BitmapConverter
 import com.vanigent.meetingapp.domain.model.Address
 import com.vanigent.meetingapp.domain.model.Meeting
 import com.vanigent.meetingapp.domain.model.Receipt
@@ -15,6 +15,7 @@ import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.BitmapState
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.ExtractedTextState
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.ReceiptItem
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.SearchBarState
+import com.vanigent.meetingapp.util.FileUtilities.storeBitmapImage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +28,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CoordinatorLoginViewModel @Inject constructor(
-    private val saveMeetingUseCase: SaveMeetingUseCase
+    private val saveMeetingUseCase: SaveMeetingUseCase,
+    private val context: Context
 ) : ViewModel() {
 
     private val _searchBarState = MutableStateFlow(SearchBarState())
@@ -156,19 +158,19 @@ class CoordinatorLoginViewModel @Inject constructor(
         }
     }
 
-    private fun bitmapToBase64String(bitmap: Bitmap?): String? {
-        return bitmap?.let {
-            BitmapConverter.convertBitmapToString(it)
-        }
-    }
-
     // Function to map ReceiptItem to Receipt
     private fun mapReceiptItemToReceipt(receiptItem: ReceiptItem): Receipt {
-        val receiptImageByteArray = bitmapToBase64String(receiptItem.bitmap)
-        Timber.d("receiptImageByteArray - $receiptImageByteArray")
+        val filePath = receiptItem.bitmap?.let {
+            storeBitmapImage(
+                context = context,
+                fileName = receiptItem.title.plus(".jpg"),
+                imageBitmap = it
+            )
+        }
+        Timber.d("filePath - $filePath")
         return Receipt(
             receiptItems = receiptItem.mapOfStrings,
-            receiptImage = receiptImageByteArray
+            receiptImagePath = if (filePath.isNullOrBlank()) "" else filePath
         )
     }
 

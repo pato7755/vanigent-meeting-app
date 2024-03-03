@@ -42,6 +42,14 @@ class MeetingRepositoryImpl @Inject constructor(
     }
 
     override suspend fun saveMeeting(meeting: Meeting): Long {
+        println("saveMeeting - ${meeting.officeLocation}")
+        meeting.receipt.map {
+            println(it.receiptItems)
+        }
+        val mappedMeeting = MeetingMapper.mapToEntity(meeting)
+        mappedMeeting.receipts.map {
+            println("mappedMeeting - ${it.receiptItems}")
+        }
         return dao.insertMeeting(MeetingMapper.mapToEntity(meeting))
     }
 
@@ -62,7 +70,7 @@ class MeetingRepositoryImpl @Inject constructor(
 
     override suspend fun getMeetings(): Flow<WorkResult<List<Meeting>>> = flow {
         emit(WorkResult.Loading())
-        val allMeetings = dao.getAllMeetings().map { MeetingMapper.mapToDomain(it) }
+        val allMeetings = dao.getAllMeetings().map { MeetingMapper.mapToDomainWithoutImages(it) }
         emit(WorkResult.Success(allMeetings))
     }
 }

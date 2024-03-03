@@ -28,5 +28,5 @@ data class AttendeeEntity(
 
 data class ReceiptEntity(
     val receiptItems: MutableMap<String, String>,
-    val receiptImage: String?
+    val receiptImagePath: String?
 )

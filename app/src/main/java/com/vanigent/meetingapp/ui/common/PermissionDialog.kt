@@ -94,3 +94,24 @@ class CameraPermissionTextProvider(private val context: Context) : PermissionTex
         }
     }
 }
+
+class ReadStoragePermissionTextProvider(private val context: Context) : PermissionTextProvider {
+    override fun getDescription(isPermanentlyDeclined: Boolean): String {
+        return if (isPermanentlyDeclined) {
+            context.getString(R.string.permanently_declined_read_storage_permission)
+        } else {
+            context.getString(R.string.need_read_access_to_your_storage)
+        }
+    }
+}
+
+class WriteStoragePermissionTextProvider(private val context: Context) : PermissionTextProvider {
+    override fun getDescription(isPermanentlyDeclined: Boolean): String {
+        return if (isPermanentlyDeclined) {
+            context.getString(R.string.permanently_declined_write_storage_permission)
+        } else {
+            context.getString(R.string.need_write_access_to_your_storage)
+        }
+    }
+}
+

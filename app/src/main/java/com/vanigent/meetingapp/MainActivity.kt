@@ -21,6 +21,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vanigent.meetingapp.ui.MainScreen
 import com.vanigent.meetingapp.ui.common.CameraPermissionTextProvider
 import com.vanigent.meetingapp.ui.common.PermissionDialog
+import com.vanigent.meetingapp.ui.common.ReadStoragePermissionTextProvider
+import com.vanigent.meetingapp.ui.common.WriteStoragePermissionTextProvider
 import com.vanigent.meetingapp.ui.coordinatorlogin.CoordinatorLoginViewModel
 import com.vanigent.meetingapp.ui.theme.MeetingAppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -62,8 +64,32 @@ class MainActivity : ComponentActivity() {
             }
         )
 
+        val writeStoragePermissionResultLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+            onResult = { isGranted ->
+                viewModel.onPermissionResult(
+                    permission = Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    isGranted = isGranted
+                )
+            }
+        )
+
+        val readStoragePermissionResultLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+            onResult = { isGranted ->
+                viewModel.onPermissionResult(
+                    permission = Manifest.permission.READ_EXTERNAL_STORAGE,
+                    isGranted = isGranted
+                )
+            }
+        )
+
+
+
         DisposableEffect(Unit) {
             cameraPermissionResultLauncher.launch(Manifest.permission.CAMERA)
+            readStoragePermissionResultLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+            writeStoragePermissionResultLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             onDispose { /* cleanup, if necessary */ }
         }
 
@@ -72,10 +98,9 @@ class MainActivity : ComponentActivity() {
             .forEach { permission ->
                 PermissionDialog(
                     permissionTextProvider = when (permission) {
-                        Manifest.permission.CAMERA -> {
-                            CameraPermissionTextProvider(this)
-                        }
-
+                        Manifest.permission.CAMERA -> CameraPermissionTextProvider(this)
+                        Manifest.permission.READ_EXTERNAL_STORAGE -> ReadStoragePermissionTextProvider(this)
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE -> WriteStoragePermissionTextProvider(this)
                         else -> return@forEach
                     },
                     isPermanentlyDeclined = !shouldShowRequestPermissionRationale(
