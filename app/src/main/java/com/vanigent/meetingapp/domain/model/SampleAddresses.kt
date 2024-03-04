@@ -61,7 +61,7 @@ object SampleAddresses {
             country = "US"
         ),
         Address(
-            physicianName = "Rutherford Spears",
+            physicianName = "Eleanor Spears",
             officeName = "BayCare Medical Group, Inc.",
             lineOne = "600 Grant St",
             city = "Pittsburgh",

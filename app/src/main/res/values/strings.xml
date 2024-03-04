@@ -24,6 +24,14 @@
     <string name="continue_button">CONTINUE</string>
     <string name="cancel_button" tools:ignore="ButtonCase">CANCEL</string>
     <string name="signature">Signature</string>
+    <string name="number_of_attendees">Number of attendees</string>
+    <string name="number_of_those_who_ate">Number of those who ate</string>
+    <string name="cost_of_the_meal">Cost of the meal</string>
+    <string name="average_cost_per_attendee">Average cost of meal</string>
+    <string name="cost_per_attendee_is_high">The cost per attendee is high, please add any missing attendees</string>
+    <string name="add_comments">Add comments as needed</string>
     <string name="professional_designation">Professional Designation</string>
     <string name="attendees_welcome_text">Thanks for attending! Please serve yourself with food and drinks, and have a seat</string>
+    <string name="statistics">Statistics</string>
+    <string name="summary_of_program">Summary of today\'s program</string>
 </resources>
