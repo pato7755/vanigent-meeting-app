@@ -167,8 +167,8 @@ class AttendeesLoginViewModel @Inject constructor(
         when {
             isFormValid -> {
                 updateIsFormBlank(false)
-                toggleSnackbarVisibility()
                 saveAttendeeDetails()
+                toggleSnackbarVisibility()
             }
 
             isFormBlank() -> {
