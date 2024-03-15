@@ -45,7 +45,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -98,7 +97,9 @@ fun CoordinatorLoginScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                     ) {
-                        RadioButtonCard()
+                        RadioButtonCard(
+                            viewModel::radioButtonSelection
+                        )
 
                         extractedTextState.receiptItems.forEachIndexed { index, receiptItem ->
                             Timber.e("${receiptItem.mapOfStrings}")
@@ -355,6 +356,7 @@ fun AddressDetailsBox(
 
 @Composable
 fun RadioButtonCard(
+    onRadioButtonSelected: (Boolean) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -378,7 +380,7 @@ fun RadioButtonCard(
                 style = MaterialTheme.typography.bodyLarge
             )
 
-            RadioButtons()
+            RadioButtons(onRadioButtonSelected = onRadioButtonSelected)
         }
     }
 

@@ -14,7 +14,9 @@ import com.vanigent.meetingapp.R
 import com.vanigent.meetingapp.ui.settings.ToggleableInfo
 
 @Composable
-fun RadioButtons() {
+fun RadioButtons(
+    onRadioButtonSelected: (Boolean) -> Unit
+) {
     val yesText = stringResource(id = R.string.yes)
     val noText = stringResource(id = R.string.no)
     val radioButtons = remember {
@@ -43,6 +45,7 @@ fun RadioButtons() {
             RadioButton(
                 selected = info.isChecked,
                 onClick = {
+                    onRadioButtonSelected(info.isChecked)
                     radioButtons.replaceAll {
                         it.copy(
                             isChecked = it.text == info.text

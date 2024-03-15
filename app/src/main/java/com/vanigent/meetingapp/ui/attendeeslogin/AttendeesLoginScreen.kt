@@ -173,10 +173,9 @@ fun AttendeesLoginScreen(
                                     style = MaterialTheme.typography.bodyLarge
                                 )
 
-                                RadioButtons()
+                                RadioButtons(onRadioButtonSelected = viewModel::radioButtonSelection)
 
                                 Spacer(modifier = Modifier.height(16.dp))
-
 
                             }
                         }

@@ -58,6 +58,17 @@ fun AttendeesLogoutScreen(
                 }
 
             }
+
+            ActionButton(
+                text = stringResource(R.string.continue_button),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally),
+                onClick = {
+//                    viewModel.performFieldValidations()
+
+                }
+            )
         }
 
         Spacer(modifier = Modifier.width(8.dp))

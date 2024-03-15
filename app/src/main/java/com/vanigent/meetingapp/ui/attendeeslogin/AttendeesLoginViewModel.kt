@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
@@ -47,6 +48,8 @@ class AttendeesLoginViewModel @Inject constructor(
 
     private val _pid = MutableStateFlow(PIDState())
     val pidState = _pid.asStateFlow()
+
+    private val radioButtonSelection = MutableStateFlow(true)
 
     private val _dialogVisibility = MutableStateFlow(DialogState(false))
     val dialogVisibility = _dialogVisibility.asStateFlow()
@@ -122,6 +125,10 @@ class AttendeesLoginViewModel @Inject constructor(
                 password = text
             )
         }
+    }
+
+    fun radioButtonSelection(selection: Boolean) {
+        radioButtonSelection.value = selection
     }
 
     private fun updateIsFormBlank(isFormBlank: Boolean) {
@@ -238,7 +245,7 @@ class AttendeesLoginViewModel @Inject constructor(
                     attendeeFirstName = firstName,
                     attendeePid = pId,
                     attendeeLastName = lastName,
-                    attendeeWillConsumeFood = true,
+                    attendeeWillConsumeFood = radioButtonSelection.value,
                     attendeeProfessionalDesignation = professionalDesignation,
                     attendeeSignature = signatureByteArray ?: byteArrayOf()
                 )

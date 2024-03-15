@@ -97,4 +97,12 @@ class AttendeesLogoutViewModel @Inject constructor(
         }
     }
 
+    fun onContinuePressed() {
+
+    }
+
+    fun generatePdf() {
+
+    }
+
 }
