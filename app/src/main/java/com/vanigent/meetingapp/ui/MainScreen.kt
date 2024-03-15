@@ -34,13 +34,13 @@ fun MainScreen() {
 
         composable(route = "attendees_login/{meetingId}") {
             AttendeesLoginScreen(
-                onContinueButtonPressed = {
-                    navController.navigate(route = "attendees_logout")
+                onContinueButtonPressed = { meetingId ->
+                    navController.navigate(route = "attendees_logout/$meetingId")
                 }
             )
         }
 
-        composable(route = "attendees_logout") {
+        composable(route = "attendees_logout/{meetingId}") {
             AttendeesLogoutScreen()
         }
 

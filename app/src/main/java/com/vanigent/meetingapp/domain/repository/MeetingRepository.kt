@@ -17,4 +17,6 @@ interface MeetingRepository {
 
     suspend fun getMeetings(): Flow<WorkResult<List<Meeting>>>
 
+    suspend fun getMeeting(meetingId: Long): Flow<WorkResult<Meeting?>>
+
 }

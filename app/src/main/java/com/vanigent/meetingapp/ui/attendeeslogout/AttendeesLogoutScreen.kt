@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -20,6 +21,7 @@ import com.vanigent.meetingapp.R
 import com.vanigent.meetingapp.ui.common.CustomCard
 import com.vanigent.meetingapp.ui.common.LazyTablePinnedScreen
 import com.vanigent.meetingapp.ui.common.SectionHeader
+import com.vanigent.meetingapp.ui.coordinatorlogin.components.ActionButton
 import com.vanigent.meetingapp.ui.coordinatorlogin.components.LabeledTextRow
 
 @Composable
@@ -27,7 +29,11 @@ fun AttendeesLogoutScreen(
     viewModel: AttendeesLogoutViewModel = hiltViewModel()
 ) {
 
-    val meetingsState by viewModel.meetingState.collectAsStateWithLifecycle()
+    val meetingState by viewModel.meetingState.collectAsStateWithLifecycle()
+    val numberOfAttendees by viewModel.numberOfAttendees.collectAsStateWithLifecycle()
+    val costOfMeal by viewModel.costOfMeal.collectAsStateWithLifecycle()
+    val numberOfThoseWhoAte by viewModel.numberOfThoseWhoAte.collectAsStateWithLifecycle()
+    val averageCostOfMeal by viewModel.averageCostOfMeal.collectAsStateWithLifecycle()
 
     Row(
         modifier = Modifier
@@ -44,10 +50,13 @@ fun AttendeesLogoutScreen(
 
                 SectionHeader(title = stringResource(R.string.summary_of_program))
 
-                LazyTablePinnedScreen(
-                    onBackClick = {},
-                    meetings = meetingsState.meetings
-                )
+                meetingState.meeting?.let {
+                    LazyTablePinnedScreen(
+                        onBackClick = {},
+                        meeting = it
+                    )
+                }
+
             }
         }
 
@@ -58,7 +67,12 @@ fun AttendeesLogoutScreen(
                 .weight(0.4f)
                 .fillMaxWidth()
         ) {
-            SummarySection()
+            SummarySection(
+                numberOfAttendees = numberOfAttendees,
+                costOfMeal = costOfMeal,
+                numberOfThoseWhoAte = numberOfThoseWhoAte,
+                averageCostOfMeal = averageCostOfMeal
+            )
         }
 
     }
@@ -66,9 +80,14 @@ fun AttendeesLogoutScreen(
 }
 
 @Composable
-fun SummarySection() {
+fun SummarySection(
+    numberOfAttendees: Int,
+    costOfMeal: Double,
+    numberOfThoseWhoAte: Int,
+    averageCostOfMeal: Double,
+) {
     CustomCard(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         SectionHeader(title = stringResource(R.string.statistics))
 
@@ -77,28 +96,28 @@ fun SummarySection() {
         ) {
             LabeledTextRow(
                 label = stringResource(R.string.number_of_attendees),
-                value = "30",
+                value = numberOfAttendees.toString(),
                 labelModifier = Modifier.weight(1.5f),
                 valueModifier = Modifier.weight(0.5f),
                 labelColor = Color.Gray
             )
             LabeledTextRow(
                 label = stringResource(R.string.number_of_those_who_ate),
-                value = "3",
+                value = numberOfThoseWhoAte.toString(),
                 labelModifier = Modifier.weight(1.5f),
                 valueModifier = Modifier.weight(0.5f),
                 labelColor = Color.Gray
             )
             LabeledTextRow(
                 label = stringResource(R.string.cost_of_the_meal),
-                value = "4",
+                value = "$${costOfMeal}",
                 labelModifier = Modifier.weight(1.5f),
                 valueModifier = Modifier.weight(0.5f),
                 labelColor = Color.Gray
             )
             LabeledTextRow(
                 label = stringResource(R.string.average_cost_per_attendee),
-                value = "$8",
+                value = "$${averageCostOfMeal}",
                 labelModifier = Modifier.weight(1.5f),
                 valueModifier = Modifier.weight(0.5f),
                 labelColor = Color.Gray

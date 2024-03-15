@@ -7,6 +7,6 @@ class FetchMeetingsUseCase @Inject constructor(
     private val meetingRepository: MeetingRepository
 ) {
 
-    suspend operator fun invoke() = meetingRepository.getMeetings()
+    suspend operator fun invoke(meetingId: Long) = meetingRepository.getMeeting(meetingId)
 
 }

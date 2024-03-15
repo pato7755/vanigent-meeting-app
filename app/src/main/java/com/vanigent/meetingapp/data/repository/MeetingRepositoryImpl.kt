@@ -73,4 +73,12 @@ class MeetingRepositoryImpl @Inject constructor(
         val allMeetings = dao.getAllMeetings().map { MeetingMapper.mapToDomainWithoutImages(it) }
         emit(WorkResult.Success(allMeetings))
     }
+
+    override suspend fun getMeeting(meetingId: Long): Flow<WorkResult<Meeting?>> = flow {
+        emit(WorkResult.Loading())
+        val meeting = dao.getMeetingById(meetingId.toString())
+            ?.let { MeetingMapper.mapToDomainWithoutImages(it) }
+        emit(WorkResult.Success(meeting))
+
+    }
 }

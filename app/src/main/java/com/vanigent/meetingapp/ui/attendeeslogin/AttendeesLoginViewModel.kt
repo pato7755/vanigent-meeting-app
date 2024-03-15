@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
@@ -245,5 +244,9 @@ class AttendeesLoginViewModel @Inject constructor(
                 )
             )
         }
+    }
+
+    fun getMeetingId(onMeetingIdReceived: (String) -> Unit) {
+        onMeetingIdReceived(meetingId.value)
     }
 }

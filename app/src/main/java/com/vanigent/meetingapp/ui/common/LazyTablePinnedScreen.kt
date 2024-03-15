@@ -34,21 +34,10 @@ import eu.wewox.lazytable.lazyTablePinConfiguration
 @Composable
 fun LazyTablePinnedScreen(
     onBackClick: () -> Unit,
-    meetings: List<Meeting>
+    meeting: Meeting
 ) {
 
     val columns = 3
-//    val meetings = produceState(initialValue =  meetingsList )
-    println("LazyTablePinnedScreen")
-    meetings.map {
-        println(
-            "_meetingState - ${
-                it.attendee.map { a ->
-                    a.attendeeLastName
-                }
-            }"
-        )
-    }
 
     Column(
         modifier = Modifier
@@ -57,17 +46,17 @@ fun LazyTablePinnedScreen(
     ) {
         var settings by remember { mutableStateOf(Settings()) }
 
-        if (meetings.isEmpty()) {
+        if (meeting.attendee.isEmpty()) {
             CircularProgressIndicator()
         } else {
             LazyTable(
                 pinConfiguration = pinConfiguration(settings),
+                dimensions = dimensions(settings = Settings()),
                 modifier = Modifier
                     .align(Alignment.Start)
             ) {
-                println("count - ${meetings.size * columns}")
                 items(
-                    count = meetings.size * columns,
+                    count = meeting.attendee.size * columns,
                     layoutInfo = {
                         LazyTableItem(
                             column = it % columns,
@@ -76,7 +65,7 @@ fun LazyTablePinnedScreen(
                     },
                 ) {
                     Cell(
-                        meeting = meetings[it / columns],
+                        attendee = meeting.attendee[it / columns],
                         column = it % columns
                     )
                 }
@@ -118,26 +107,20 @@ private fun pinConfiguration(settings: Settings): LazyTablePinConfiguration =
 
 @Composable
 private fun Cell(
-    meeting: Meeting,
+    attendee: Attendee,
     column: Int,
 ) {
     val content = when (column) {
         0 -> {
-            if (meeting.attendee.isNotEmpty())
-                meeting.attendee[0].attendeeFirstName
-            else ""
+            attendee.attendeeFirstName
         }
 
         1 -> {
-            if (meeting.attendee.isNotEmpty())
-                meeting.attendee[0].attendeeLastName
-            else ""
+            attendee.attendeeLastName
         }
 
         2 -> {
-            if (meeting.attendee.isNotEmpty())
-                meeting.attendee[0].attendeeWillConsumeFood.toString()
-            else ""
+            attendee.attendeeWillConsumeFood.toString()
         }
 
         else -> "error"
@@ -160,7 +143,7 @@ private fun HeaderCell(column: Int) {
     val content = when (column) {
         0 -> "First Name"
         1 -> "Last Name"
-        2 -> "Food?"
+        2 -> "Food"
         else -> ""
     }
 
@@ -247,7 +230,7 @@ fun meetings(): List<Meeting> {
 )
 fun MediumSizedTablet() {
     LazyTablePinnedScreen(
-        meetings = meetings(),
+        meeting = meetings()[0],
         onBackClick = {}
     )
 }
@@ -260,7 +243,7 @@ fun MediumSizedTablet() {
 )
 fun ExpandedSizedTablet() {
     LazyTablePinnedScreen(
-        meetings = meetings(),
+        meeting = meetings()[0],
         onBackClick = {}
     )
 }
