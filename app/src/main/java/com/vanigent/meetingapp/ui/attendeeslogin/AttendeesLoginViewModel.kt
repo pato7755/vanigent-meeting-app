@@ -13,6 +13,7 @@ import com.vanigent.meetingapp.domain.usecase.SaveAttendeeUseCase
 import com.vanigent.meetingapp.ui.attendeeslogin.components.Line
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.DialogPasswordState
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.DialogState
+import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.ErrorState
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.FirstNameState
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.LastNameState
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.PIDState
@@ -68,6 +69,9 @@ class AttendeesLoginViewModel @Inject constructor(
 
     private val _signatureBitmap = MutableStateFlow(SignatureState(null, mutableListOf()))
     val signatureBitmap = _signatureBitmap.asStateFlow()
+
+    private val _errorState = MutableStateFlow(ErrorState())
+    val errorState = _errorState.asStateFlow()
 
     init {
         meetingId.value = savedStateHandle.get<String>("meetingId") ?: ""
@@ -137,13 +141,24 @@ class AttendeesLoginViewModel @Inject constructor(
         }
     }
 
-    fun performFieldValidations() {
+    fun performFieldValidations(outputErrors: (ErrorState) -> Unit) {
 
         val isFirstNameValid = isNameValid(_firstName.value.firstName)
 
         val isLastNameValid = isNameValid(_lastName.value.lastName)
 
         val isPidValid = isPidValid(_pid.value.pId)
+
+        val isProfessionalDesignationValid = isProfessionalDesignationValid()
+
+        val isSignatureValid = isSignatureValid()
+
+        _errorState.update { state ->
+            state.copy(
+                isProfessionalDesignationValid = isProfessionalDesignationValid,
+                isSignatureValid = isSignatureValid
+            )
+        }
 
         _firstName.update { state ->
             state.copy(isValid = isFirstNameValid || state.firstName.isNotBlank())
@@ -157,7 +172,13 @@ class AttendeesLoginViewModel @Inject constructor(
             state.copy(isValid = isPidValid || state.pId.isNotBlank())
         }
 
-        val isFormValid = isFirstNameValid && isLastNameValid && isPidValid
+        outputErrors(_errorState.value)
+
+        val isFormValid = isFirstNameValid
+                && isLastNameValid
+                && isPidValid
+                && isProfessionalDesignationValid
+                && isSignatureValid
 
         /**
          * if isFormValid is true, it means all fields have been filled in properly with the right data formats.
@@ -199,6 +220,14 @@ class AttendeesLoginViewModel @Inject constructor(
         return _firstName.value.firstName.isBlank() && _lastName.value.lastName.isBlank() && _pid.value.pId.isBlank()
     }
 
+    private fun isProfessionalDesignationValid(): Boolean {
+        return _selectedDropdownOption.value.isNotBlank()
+    }
+
+    private fun isSignatureValid(): Boolean {
+        return _signatureLines.isNotEmpty()
+    }
+
     fun updateSignature(bitmap: ImageBitmap) {
         _signatureBitmap.update { state ->
             state.copy(
@@ -218,11 +247,12 @@ class AttendeesLoginViewModel @Inject constructor(
 
     fun clearForm() {
         updateDropdownSelectedOption("")
-        updateIsFormBlank(true)
         clearCanvas()
         _firstName.value = FirstNameState()
         _lastName.value = LastNameState()
         _pid.value = PIDState()
+        _errorState.value = ErrorState()
+        updateIsFormBlank(true)
     }
 
     private fun saveAttendeeDetails() {

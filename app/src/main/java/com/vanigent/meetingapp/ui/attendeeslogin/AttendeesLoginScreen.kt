@@ -1,5 +1,6 @@
 package com.vanigent.meetingapp.ui.attendeeslogin
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -70,6 +72,7 @@ fun AttendeesLoginScreen(
     val coroutineScope = rememberCoroutineScope()
     val isFormBlank by viewModel.isFormBlankState.collectAsStateWithLifecycle()
     val dialogPassword by viewModel.dialogPassword.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
@@ -202,14 +205,33 @@ fun AttendeesLoginScreen(
                             )
                         }
 
+                        val errorTextSignature = stringResource(id = R.string.please_add_signature)
+                        val errorTextDesignation = stringResource(id = R.string.please_select_designation)
+
                         ActionButton(
                             text = stringResource(R.string.continue_button),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .align(Alignment.CenterHorizontally),
                             onClick = {
-                                viewModel.performFieldValidations()
-
+                                viewModel.performFieldValidations { error ->
+                                    when {
+                                        error.isProfessionalDesignationValid == false -> {
+                                            Toast.makeText(
+                                                context,
+                                                errorTextDesignation,
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                        error.isSignatureValid == false -> {
+                                            Toast.makeText(
+                                                context,
+                                                errorTextSignature,
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
+                                }
                             }
                         )
 

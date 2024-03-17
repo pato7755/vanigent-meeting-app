@@ -34,4 +34,6 @@
     <string name="attendees_welcome_text">Thanks for attending! Please serve yourself with food and drinks, and have a seat</string>
     <string name="statistics">Statistics</string>
     <string name="summary_of_program">Summary of today\'s program</string>
+    <string name="please_add_signature">Please add signature</string>
+    <string name="please_select_designation">Please select your professional designation</string>
 </resources>
