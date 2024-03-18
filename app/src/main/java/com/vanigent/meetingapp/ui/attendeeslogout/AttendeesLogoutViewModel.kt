@@ -1,11 +1,13 @@
 package com.vanigent.meetingapp.ui.attendeeslogout
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vanigent.meetingapp.common.WorkResult
 import com.vanigent.meetingapp.domain.usecase.FetchMeetingsUseCase
 import com.vanigent.meetingapp.ui.attendeeslogout.stateholders.MeetingState
+import com.vanigent.meetingapp.util.FileUtilities.generatePDF
 import com.vanigent.meetingapp.util.Utilities.removeDollar
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +22,8 @@ import javax.inject.Inject
 @HiltViewModel
 class AttendeesLogoutViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val fetchMeetingsUseCase: FetchMeetingsUseCase
+    private val fetchMeetingsUseCase: FetchMeetingsUseCase,
+    private val context: Context
 ) : ViewModel() {
 
     private val meetingId = MutableStateFlow("")
@@ -98,10 +101,21 @@ class AttendeesLogoutViewModel @Inject constructor(
     }
 
     fun onContinuePressed() {
-
-    }
-
-    fun generatePdf() {
+        val filename = "Default.pdf"
+        val meetingStatistics = mapOf(
+            "Number of attendees" to _numberOfAttendees.value.toString(),
+            "Number of those who consumed food" to _numberOfThoseWhoAte.value.toString(),
+            "Total cost of meal" to _costOfMeal.value.toString(),
+            "Average cost of meal per attendee" to _averageCostOfMeal.value.toString(),
+        )
+        _meetingState.value.meeting?.let {
+            generatePDF(
+                context = context,
+                filename = filename,
+                meeting = it,
+                meetingStatistics = meetingStatistics
+            )
+        }
 
     }
 

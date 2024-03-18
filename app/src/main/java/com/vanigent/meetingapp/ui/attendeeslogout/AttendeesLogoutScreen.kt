@@ -65,8 +65,7 @@ fun AttendeesLogoutScreen(
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally),
                 onClick = {
-//                    viewModel.performFieldValidations()
-
+                    viewModel.onContinuePressed()
                 }
             )
         }
