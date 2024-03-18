@@ -126,22 +126,6 @@ fun AttendeesLoginScreen(
 
                                 OutlinedTextField(
                                     modifier = Modifier.fillMaxWidth(),
-                                    label = { Text("Last Name") },
-                                    value = lastNameState.lastName,
-                                    singleLine = true,
-                                    keyboardOptions = KeyboardOptions(
-                                        keyboardType = KeyboardType.Text,
-                                        capitalization = KeyboardCapitalization.Words
-                                    ),
-                                    onValueChange = {
-                                        viewModel.onLastNameTextChanged(it)
-                                    },
-                                    isError = if (isFormBlank) false
-                                    else lastNameState.isValid?.not() == true
-                                )
-
-                                OutlinedTextField(
-                                    modifier = Modifier.fillMaxWidth(),
                                     label = { Text("First Name") },
                                     value = firstNameState.firstName,
                                     singleLine = true,
@@ -154,6 +138,22 @@ fun AttendeesLoginScreen(
                                     },
                                     isError = if (isFormBlank) false
                                     else firstNameState.isValid?.not() == true
+                                )
+
+                                OutlinedTextField(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    label = { Text("Last Name") },
+                                    value = lastNameState.lastName,
+                                    singleLine = true,
+                                    keyboardOptions = KeyboardOptions(
+                                        keyboardType = KeyboardType.Text,
+                                        capitalization = KeyboardCapitalization.Words
+                                    ),
+                                    onValueChange = {
+                                        viewModel.onLastNameTextChanged(it)
+                                    },
+                                    isError = if (isFormBlank) false
+                                    else lastNameState.isValid?.not() == true
                                 )
 
                                 OutlinedTextField(
