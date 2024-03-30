@@ -1,8 +1,10 @@
 package com.vanigent.meetingapp.data.mapper
 
+import com.vanigent.meetingapp.data.local.entity.AddressEntity
 import com.vanigent.meetingapp.data.local.entity.AttendeeEntity
 import com.vanigent.meetingapp.data.local.entity.MeetingEntity
 import com.vanigent.meetingapp.data.local.entity.ReceiptEntity
+import com.vanigent.meetingapp.domain.model.Address
 import com.vanigent.meetingapp.domain.model.Attendee
 import com.vanigent.meetingapp.domain.model.Meeting
 import com.vanigent.meetingapp.domain.model.Receipt
@@ -10,7 +12,14 @@ import com.vanigent.meetingapp.domain.model.Receipt
 object MeetingMapper {
     fun mapToEntity(meeting: Meeting): MeetingEntity {
         return MeetingEntity(
-            officeLocation = meeting.officeLocation,
+            address = AddressEntity(
+                physicianName = meeting.address.physicianName,
+                officeName = meeting.address.officeName,
+                lineOne = meeting.address.lineOne,
+                city = meeting.address.city,
+                state = meeting.address.state,
+                country = meeting.address.country
+            ),
             coordinatorWillConsumeFood = meeting.coordinatorWillConsumeFood,
             attendees = meeting.attendee.map {
                 AttendeeEntity(
@@ -33,7 +42,14 @@ object MeetingMapper {
 
     fun mapToDomain(meetingEntity: MeetingEntity): Meeting {
         return Meeting(
-            officeLocation = meetingEntity.officeLocation,
+            address = Address(
+                physicianName = meetingEntity.address.physicianName,
+                officeName = meetingEntity.address.officeName,
+                lineOne = meetingEntity.address.lineOne,
+                city = meetingEntity.address.city,
+                state = meetingEntity.address.state,
+                country = meetingEntity.address.country
+            ),
             coordinatorWillConsumeFood = meetingEntity.coordinatorWillConsumeFood,
             attendee = meetingEntity.attendees.map {
                 Attendee(
@@ -56,7 +72,14 @@ object MeetingMapper {
 
     fun mapToDomainWithoutImages(meetingEntity: MeetingEntity): Meeting {
         return Meeting(
-            officeLocation = meetingEntity.officeLocation,
+            address = Address(
+                physicianName = meetingEntity.address.physicianName,
+                officeName = meetingEntity.address.officeName,
+                lineOne = meetingEntity.address.lineOne,
+                city = meetingEntity.address.city,
+                state = meetingEntity.address.state,
+                country = meetingEntity.address.country
+            ),
             coordinatorWillConsumeFood = meetingEntity.coordinatorWillConsumeFood,
             attendee = meetingEntity.attendees.map {
                 Attendee(

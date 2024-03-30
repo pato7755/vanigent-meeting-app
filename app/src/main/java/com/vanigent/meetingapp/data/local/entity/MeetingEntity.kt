@@ -8,13 +8,13 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "meeting", indices = [Index(value = ["id"], unique = true)])
 data class MeetingEntity(
 
+    @PrimaryKey val id: Int? = null,
     @ColumnInfo(name = "location")
-    val officeLocation: String,
+    val address: AddressEntity,
     @ColumnInfo(name = "coordinator_will_consume_food")
     val coordinatorWillConsumeFood: Boolean,
     val attendees: List<AttendeeEntity>,
-    val receipts: List<ReceiptEntity>,
-    @PrimaryKey val id: Int? = null
+    val receipts: List<ReceiptEntity>
 )
 
 data class AttendeeEntity(
@@ -29,4 +29,13 @@ data class AttendeeEntity(
 data class ReceiptEntity(
     val receiptItems: MutableMap<String, String>,
     val receiptImagePath: String?
+)
+
+data class AddressEntity(
+    val physicianName: String,
+    val officeName: String,
+    val lineOne: String,
+    val city: String,
+    val state: String,
+    val country: String
 )

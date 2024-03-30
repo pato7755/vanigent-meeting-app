@@ -15,8 +15,8 @@ object AttendeeMapper {
         )
     }
 
-    fun mapToDomain(attendeeEntity: AttendeeEntity): AttendeeEntity {
-        return AttendeeEntity(
+    fun mapToDomain(attendeeEntity: AttendeeEntity): Attendee {
+        return Attendee(
             attendeeFirstName = attendeeEntity.attendeeFirstName,
             attendeeLastName = attendeeEntity.attendeeLastName,
             attendeePid = attendeeEntity.attendeePid,

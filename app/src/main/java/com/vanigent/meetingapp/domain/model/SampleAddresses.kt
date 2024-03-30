@@ -1,14 +1,5 @@
 package com.vanigent.meetingapp.domain.model
 
-data class Address(
-    val physicianName: String,
-    val officeName: String,
-    val lineOne: String,
-    val city: String,
-    val state: String,
-    val country: String
-)
-
 object SampleAddresses {
 
     val addresses = listOf(
