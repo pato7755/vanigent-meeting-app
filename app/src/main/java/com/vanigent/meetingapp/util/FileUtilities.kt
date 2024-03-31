@@ -2,6 +2,7 @@ package com.vanigent.meetingapp.util
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.os.Environment
 import android.widget.Toast
 import com.itextpdf.io.font.FontConstants
 import com.itextpdf.kernel.font.PdfFontFactory.createFont
@@ -53,9 +54,11 @@ object FileUtilities {
         context: Context,
         filename: String,
         meeting: Meeting,
+        comments: String,
         meetingStatistics: Map<String, String>
     ) {
-        val file = File(context.filesDir, filename)
+//        val file = File(context.filesDir, filename)
+        val file = File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), filename)
         val outputStream = FileOutputStream(file)
         val pdfWriter = PdfWriter(outputStream)
         val pdfDocument = PdfDocument(pdfWriter)
@@ -71,11 +74,17 @@ object FileUtilities {
         val date = Paragraph("Date of event: ${getCurrentDate()}").setFont(titleFont)
         document.add(date)
 
-        val location = Paragraph("Location - ${meeting.officeLocation}").setFont(normalFont)
-        document.add(location)
+        val institutionName = Paragraph("Institution name: ${meeting.address.officeName}").setFont(titleFont)
+        document.add(institutionName)
+
+        val institutionAddress = Paragraph("Institution address: ${meeting.address.lineOne}").setFont(titleFont)
+        document.add(institutionAddress)
+
+        val physicianName = Paragraph("Physician name: ${meeting.address.physicianName}").setFont(titleFont)
+        document.add(physicianName)
 
         val coordinatorFood = Paragraph(
-            "Coordinator Will Consume Food - " +
+            "Did Coordinator Consume Food - " +
                     if (meeting.coordinatorWillConsumeFood) "Yes" else "No"
         ).setFont(normalFont)
         document.add(coordinatorFood)
@@ -84,15 +93,16 @@ object FileUtilities {
         document.add(attendeesTitle)
 
         val attendeesTableHeaders = listOf(
+            "",
             "FIRST NAME",
             "LAST NAME",
-            "PROFESSIONAL DESIGNATION",
+            "PROFESSIONAL \n DESIGNATION",
             "SIGNATURE",
             "CONSUME FOOD"
         )
 
         // Create table for attendees
-        val attendeesTable = Table(floatArrayOf(20f, 50f, 50f, 30f, 20f)).useAllAvailableWidth()
+        val attendeesTable = Table(floatArrayOf(20f, 50f, 50f, 50f, 30f, 20f)).useAllAvailableWidth()
         attendeesTableHeaders.forEach {
             attendeesTable.addHeaderCell(it)
         }
@@ -101,6 +111,7 @@ object FileUtilities {
             attendeesTable.addCell(Cell().add(Paragraph(attendee.attendeeFirstName)))
             attendeesTable.addCell(Cell().add(Paragraph(attendee.attendeeLastName)))
             attendeesTable.addCell(Cell().add(Paragraph(attendee.attendeeProfessionalDesignation)))
+            attendeesTable.addCell(Cell().add(Paragraph("")))
             attendeesTable.addCell(Cell().add(Paragraph(if (attendee.attendeeWillConsumeFood) "Yes" else "No")))
         }
         document.add(attendeesTable)
@@ -113,16 +124,8 @@ object FileUtilities {
             document.add(item)
         }
 
-
-        // Create table for receipts
-//        val receiptsTable = Table(floatArrayOf(200f, 100f)).useAllAvailableWidth()
-//        meeting.receipt.forEachIndexed { index, receipt ->
-//            val vendorName = receipt.receiptItems["VENDOR NAME"] ?: ""
-//            val total = receipt.receiptItems["TOTAL"] ?: ""
-//            receiptsTable.addCell(Cell().add(Paragraph("${index + 1}. Vendor Name: $vendorName")))
-//            receiptsTable.addCell(Cell().add(Paragraph("Total: $total")))
-//        }
-//        document.add(receiptsTable)
+        val generalComments = Paragraph("General Comments: $comments").setFont(titleFont)
+        document.add(generalComments)
 
         document.close()
         pdfDocument.close()
@@ -130,68 +133,5 @@ object FileUtilities {
 
         Toast.makeText(context, "PDF generated successfully", Toast.LENGTH_SHORT).show()
     }
-
-    fun generateITextPDF(context: Context, filename: String, meeting: Meeting) {
-        val file = File(context.filesDir, filename)
-        val outputStream = FileOutputStream(file)
-        val pdfWriter = PdfWriter(outputStream)
-        val pdfDocument = com.itextpdf.kernel.pdf.PdfDocument(pdfWriter)
-        val document = com.itextpdf.layout.Document(pdfDocument)
-
-        val titleFont = createFont(FontConstants.HELVETICA_BOLD)
-        val normalFont = createFont(FontConstants.HELVETICA)
-
-        // Write Meeting data onto the page
-        val title = Paragraph("Meeting ID - 28").setFont(titleFont)
-        document.add(title)
-
-        val location = Paragraph("Location - ${meeting.officeLocation}").setFont(normalFont)
-        document.add(location)
-
-        val coordinatorFood =
-            Paragraph("Coordinator Will Consume Food - ${if (meeting.coordinatorWillConsumeFood) "Yes" else "No"}").setFont(
-                normalFont
-            )
-        document.add(coordinatorFood)
-
-        val attendeesTitle = Paragraph("Attendees:").setFont(titleFont)
-        document.add(attendeesTitle)
-        meeting.attendee.forEachIndexed { index, attendee ->
-            val attendeeText =
-                Paragraph("${index + 1}. ${attendee.attendeeFirstName} ${attendee.attendeeLastName}").setFont(
-                    normalFont
-                )
-            document.add(attendeeText)
-            val designationText =
-                Paragraph("   Professional Designation: ${attendee.attendeeProfessionalDesignation}").setFont(
-                    normalFont
-                )
-            document.add(designationText)
-            val consumeFoodText =
-                Paragraph("   Will Consume Food: ${if (attendee.attendeeWillConsumeFood) "Yes" else "No"}").setFont(
-                    normalFont
-                )
-            document.add(consumeFoodText)
-        }
-
-        val receiptsTitle = Paragraph("Receipts:").setFont(titleFont)
-        document.add(receiptsTitle)
-        meeting.receipt.forEachIndexed { index, receipt ->
-            val vendorName = receipt.receiptItems["VENDOR NAME"]
-            val total = receipt.receiptItems["TOTAL"]
-            val receiptText =
-                Paragraph("${index + 1}. Vendor Name: $vendorName").setFont(normalFont)
-            document.add(receiptText)
-            val totalText = Paragraph("   Total: $total").setFont(normalFont)
-            document.add(totalText)
-        }
-
-        document.close()
-        pdfDocument.close()
-        pdfWriter.close()
-
-        Toast.makeText(context, "PDF generated successfully", Toast.LENGTH_SHORT).show()
-    }
-
 
 }

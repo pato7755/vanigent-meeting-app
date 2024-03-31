@@ -16,6 +16,7 @@ import com.vanigent.meetingapp.R
 @Composable
 fun ActionButton(
     text: String,
+    enabled: Boolean = true,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     colors: ButtonColors = ButtonDefaults.buttonColors(
@@ -31,6 +32,7 @@ fun ActionButton(
     Button(
         onClick = onClick,
         modifier = modifier,
+        enabled = enabled,
         colors = colors,
         elevation = elevation,
         shape = RoundedCornerShape(20.dp)

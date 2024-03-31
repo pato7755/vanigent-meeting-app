@@ -42,7 +42,7 @@ class MeetingRepositoryImpl @Inject constructor(
     }
 
     override suspend fun saveMeeting(meeting: Meeting): Long {
-        println("saveMeeting - ${meeting.officeLocation}")
+        println("saveMeeting - ${meeting.address}")
         meeting.receipt.map {
             println(it.receiptItems)
         }

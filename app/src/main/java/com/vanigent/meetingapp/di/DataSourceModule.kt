@@ -30,13 +30,15 @@ object DataSourceModule {
     fun providesMeetingDatabase(app: Application): MeetingDatabase {
 //        val db: MeetingDatabase
 //        try {
-            val db = Room.databaseBuilder(
-                context = app,
-                MeetingDatabase::class.java,
-                "meeting_database"
-            ).build()
-            Timber.e("context - $app")
-            Timber.e("Database initialized successfully")
+        val db = Room.databaseBuilder(
+            context = app,
+            MeetingDatabase::class.java,
+            "meeting_database"
+        )
+            .fallbackToDestructiveMigration()
+            .build()
+        Timber.e("context - $app")
+        Timber.e("Database initialized successfully")
 //        }
         return db
     }

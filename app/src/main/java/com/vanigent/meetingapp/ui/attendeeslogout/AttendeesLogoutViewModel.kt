@@ -6,7 +6,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vanigent.meetingapp.common.WorkResult
 import com.vanigent.meetingapp.domain.usecase.FetchMeetingsUseCase
+import com.vanigent.meetingapp.ui.attendeeslogout.stateholders.CommentState
 import com.vanigent.meetingapp.ui.attendeeslogout.stateholders.MeetingState
+import com.vanigent.meetingapp.util.Constants.MAXIMUM_ALLOWED_COST_PER_MEAL
 import com.vanigent.meetingapp.util.FileUtilities.generatePDF
 import com.vanigent.meetingapp.util.Utilities.removeDollar
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -31,8 +34,8 @@ class AttendeesLogoutViewModel @Inject constructor(
     private val _meetingState = MutableStateFlow(MeetingState(null))
     val meetingState = _meetingState.asStateFlow()
 
-    private val _isCostPerAttendeeValidated = MutableStateFlow(false)
-    val isCostPerAttendeeValidated = _isCostPerAttendeeValidated.asStateFlow()
+    private val _isCostPerAttendeeWithinLimit = MutableStateFlow(false)
+    val isCostPerAttendeeWithinLimit = _isCostPerAttendeeWithinLimit.asStateFlow()
 
     private val _numberOfAttendees = MutableStateFlow(0)
     val numberOfAttendees = _numberOfAttendees.asStateFlow()
@@ -46,10 +49,28 @@ class AttendeesLogoutViewModel @Inject constructor(
     private val _averageCostOfMeal = MutableStateFlow(0.00)
     val averageCostOfMeal = _averageCostOfMeal.asStateFlow()
 
+    private val _comments = MutableStateFlow(CommentState(""))
+    val commentsState = _comments.asStateFlow()
+
     init {
         meetingId.value = savedStateHandle.get<String>("meetingId") ?: ""
         Timber.d("meetingId.value - ${meetingId.value}")
         fetchMeeting(meetingId.value.toLong())
+    }
+
+    fun onCommentsChanged(text: String) {
+        val isCommentValid = text.isNotBlank()
+        _comments.update { state ->
+            state.copy(
+                comment = text,
+                isValid = isCommentValid
+            )
+        }
+    }
+
+    private fun validateCostPerAttendee(averageCostPerMeal: Double) {
+        val isValid = averageCostPerMeal.compareTo(MAXIMUM_ALLOWED_COST_PER_MEAL) <= 0
+        _isCostPerAttendeeWithinLimit.value = isValid
     }
 
     private fun fetchMeeting(meetingId: Long) {
@@ -89,6 +110,10 @@ class AttendeesLogoutViewModel @Inject constructor(
                             }
                         }
 
+//                        withContext(Dispatchers.Main) {
+                            validateCostPerAttendee(_averageCostOfMeal.value)
+//                        }
+
                     }
 
                     is WorkResult.Error -> {
@@ -105,14 +130,15 @@ class AttendeesLogoutViewModel @Inject constructor(
         val meetingStatistics = mapOf(
             "Number of attendees" to _numberOfAttendees.value.toString(),
             "Number of those who consumed food" to _numberOfThoseWhoAte.value.toString(),
-            "Total cost of meal" to _costOfMeal.value.toString(),
-            "Average cost of meal per attendee" to _averageCostOfMeal.value.toString(),
+            "Total cost of meal" to "$".plus(_costOfMeal.value.toString()),
+            "Average cost of meal per attendee" to "$".plus(_averageCostOfMeal.value.toString()),
         )
         _meetingState.value.meeting?.let {
             generatePDF(
                 context = context,
                 filename = filename,
                 meeting = it,
+                comments = commentsState.value.comment,
                 meetingStatistics = meetingStatistics
             )
         }

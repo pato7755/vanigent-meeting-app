@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.vanigent.meetingapp.R
+import com.vanigent.meetingapp.domain.model.Address
 import com.vanigent.meetingapp.domain.model.Attendee
 import com.vanigent.meetingapp.domain.model.Meeting
 import eu.wewox.lazytable.LazyTable
@@ -176,7 +177,14 @@ private data class Settings(
 fun meetings(): List<Meeting> {
     return listOf(
         Meeting(
-            officeLocation = "Cook County",
+            address = Address(
+                physicianName = "",
+                officeName = "",
+                lineOne = "",
+                city = "",
+                state = "",
+                country = "",
+            ),
             coordinatorWillConsumeFood = false,
             receipt = listOf(),
             attendee = listOf(
@@ -191,7 +199,14 @@ fun meetings(): List<Meeting> {
             )
         ),
         Meeting(
-            officeLocation = "Atlanta",
+            address = Address(
+                physicianName = "",
+                officeName = "",
+                lineOne = "",
+                city = "",
+                state = "",
+                country = "",
+            ),
             coordinatorWillConsumeFood = false,
             receipt = listOf(),
             attendee = listOf(
@@ -206,7 +221,14 @@ fun meetings(): List<Meeting> {
             )
         ),
         Meeting(
-            officeLocation = "Miami",
+            address = Address(
+                physicianName = "",
+                officeName = "",
+                lineOne = "",
+                city = "",
+                state = "",
+                country = "",
+            ),
             coordinatorWillConsumeFood = true,
             receipt = listOf(),
             attendee = listOf(

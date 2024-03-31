@@ -50,7 +50,8 @@ class AttendeesLoginViewModel @Inject constructor(
     private val _pid = MutableStateFlow(PIDState())
     val pidState = _pid.asStateFlow()
 
-    private val radioButtonSelection = MutableStateFlow(true)
+    private val _radioButtonSelection = MutableStateFlow<Boolean?>(null)
+    val radioButtonSelection = _radioButtonSelection.asStateFlow()
 
     private val _dialogVisibility = MutableStateFlow(DialogState(false))
     val dialogVisibility = _dialogVisibility.asStateFlow()
@@ -131,9 +132,9 @@ class AttendeesLoginViewModel @Inject constructor(
         }
     }
 
-    fun radioButtonSelection(selection: Boolean) {
-        radioButtonSelection.value = selection
-    }
+//    fun radioButtonSelection(selection: Boolean) {
+//        radioButtonSelection.value = selection
+//    }
 
     private fun updateIsFormBlank(isFormBlank: Boolean) {
         _isFormBlankState.update {
@@ -147,7 +148,7 @@ class AttendeesLoginViewModel @Inject constructor(
 
         val isLastNameValid = isNameValid(_lastName.value.lastName)
 
-        val isPidValid = isPidValid(_pid.value.pId)
+//        val isPidValid = isPidValid(_pid.value.pId)
 
         val isProfessionalDesignationValid = isProfessionalDesignationValid()
 
@@ -168,15 +169,10 @@ class AttendeesLoginViewModel @Inject constructor(
             state.copy(isValid = isLastNameValid || state.lastName.isNotBlank())
         }
 
-        _pid.update { state ->
-            state.copy(isValid = isPidValid || state.pId.isNotBlank())
-        }
-
         outputErrors(_errorState.value)
 
         val isFormValid = isFirstNameValid
                 && isLastNameValid
-                && isPidValid
                 && isProfessionalDesignationValid
                 && isSignatureValid
 
@@ -209,11 +205,7 @@ class AttendeesLoginViewModel @Inject constructor(
     }
 
     private fun isNameValid(text: String): Boolean {
-        return text.matches(Regex("^[A-Za-z]+\$"))
-    }
-
-    private fun isPidValid(number: String): Boolean {
-        return number.matches(Regex("^\\d+\$"))
+        return text.matches(Regex("^[A-Za-z -]+\$"))
     }
 
     private fun isFormBlank(): Boolean {
@@ -240,6 +232,14 @@ class AttendeesLoginViewModel @Inject constructor(
         _signatureLines.addAll(newLines)
     }
 
+//    fun resetRadioButtonSelection() {
+//        _radioButtonSelection.value = null
+//    }
+
+    fun setRadioButtonSelection(selection: Boolean?) {
+        _radioButtonSelection.value = selection
+    }
+
     private fun clearCanvas() {
         _signatureBitmap.value = SignatureState(bitmap = null, mutableListOf())
         _signatureLines.clear()
@@ -251,14 +251,15 @@ class AttendeesLoginViewModel @Inject constructor(
         _firstName.value = FirstNameState()
         _lastName.value = LastNameState()
         _pid.value = PIDState()
+        setRadioButtonSelection(null)
         _errorState.value = ErrorState()
         updateIsFormBlank(true)
     }
 
     private fun saveAttendeeDetails() {
-        val firstName = _firstName.value.firstName
-        val lastName = _lastName.value.lastName
-        val pId = _pid.value.pId
+        val firstName = _firstName.value.firstName.trim()
+        val lastName = _lastName.value.lastName.trim()
+        val pId = _pid.value.pId.trim()
         val professionalDesignation = _selectedDropdownOption.value
         val signatureBitmap = _signatureBitmap.value.bitmap?.asAndroidBitmap()
 
@@ -275,7 +276,7 @@ class AttendeesLoginViewModel @Inject constructor(
                     attendeeFirstName = firstName,
                     attendeePid = pId,
                     attendeeLastName = lastName,
-                    attendeeWillConsumeFood = radioButtonSelection.value,
+                    attendeeWillConsumeFood = radioButtonSelection.value ?: false,
                     attendeeProfessionalDesignation = professionalDesignation,
                     attendeeSignature = signatureByteArray ?: byteArrayOf()
                 )

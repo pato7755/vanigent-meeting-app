@@ -3,6 +3,7 @@ package com.vanigent.meetingapp.data
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.vanigent.meetingapp.data.local.entity.AddressEntity
 import com.vanigent.meetingapp.data.local.entity.AttendeeEntity
 import com.vanigent.meetingapp.data.local.entity.ReceiptEntity
 
@@ -32,5 +33,15 @@ class Converters {
         }
         val listType = object : TypeToken<List<ReceiptEntity>>() {}.type
         return gson.fromJson(receiptString, listType) ?: emptyList()
+    }
+
+    @TypeConverter
+    fun fromAddress(address: AddressEntity): String {
+        return gson.toJson(address)
+    }
+
+    @TypeConverter
+    fun toAddress(addressString: String): AddressEntity {
+        return gson.fromJson(addressString, AddressEntity::class.java)
     }
 }

@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -73,6 +74,7 @@ fun AttendeesLoginScreen(
     val isFormBlank by viewModel.isFormBlankState.collectAsStateWithLifecycle()
     val dialogPassword by viewModel.dialogPassword.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val selectedRadioButtonOption = viewModel.radioButtonSelection.collectAsStateWithLifecycle()
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
@@ -126,12 +128,13 @@ fun AttendeesLoginScreen(
 
                                 OutlinedTextField(
                                     modifier = Modifier.fillMaxWidth(),
-                                    label = { Text("First Name") },
+                                    label = { Text(stringResource(id = R.string.first_name)) },
                                     value = firstNameState.firstName,
                                     singleLine = true,
                                     keyboardOptions = KeyboardOptions(
                                         keyboardType = KeyboardType.Text,
-                                        capitalization = KeyboardCapitalization.Words
+                                        capitalization = KeyboardCapitalization.Words,
+                                        imeAction = ImeAction.Next
                                     ),
                                     onValueChange = {
                                         viewModel.onFirstNameTextChanged(it)
@@ -142,12 +145,13 @@ fun AttendeesLoginScreen(
 
                                 OutlinedTextField(
                                     modifier = Modifier.fillMaxWidth(),
-                                    label = { Text("Last Name") },
+                                    label = { Text(stringResource(id = R.string.last_name)) },
                                     value = lastNameState.lastName,
                                     singleLine = true,
                                     keyboardOptions = KeyboardOptions(
                                         keyboardType = KeyboardType.Text,
-                                        capitalization = KeyboardCapitalization.Words
+                                        capitalization = KeyboardCapitalization.Words,
+                                        imeAction = ImeAction.Next
                                     ),
                                     onValueChange = {
                                         viewModel.onLastNameTextChanged(it)
@@ -158,15 +162,13 @@ fun AttendeesLoginScreen(
 
                                 OutlinedTextField(
                                     modifier = Modifier.fillMaxWidth(),
-                                    label = { Text("PID") },
+                                    label = { Text(stringResource(id = R.string.pid)) },
                                     value = pidState.pId,
                                     singleLine = true,
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                     onValueChange = {
                                         viewModel.onPidTextChanged(it)
-                                    },
-                                    isError = if (isFormBlank) false
-                                    else pidState.isValid?.not() == true
+                                    }
                                 )
 
                                 Spacer(modifier = Modifier.height(16.dp))
@@ -176,7 +178,13 @@ fun AttendeesLoginScreen(
                                     style = MaterialTheme.typography.bodyLarge
                                 )
 
-                                RadioButtons(onRadioButtonSelected = viewModel::radioButtonSelection)
+                                RadioButtons(
+                                    selectedOption = selectedRadioButtonOption.value
+                                ) {
+                                    viewModel.setRadioButtonSelection(it)
+                                }
+//                                    onRadioButtonSelected = viewModel::radioButtonSelection
+
 
                                 Spacer(modifier = Modifier.height(16.dp))
 

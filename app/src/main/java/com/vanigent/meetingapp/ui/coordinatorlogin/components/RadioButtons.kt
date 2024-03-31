@@ -15,18 +15,23 @@ import com.vanigent.meetingapp.ui.settings.ToggleableInfo
 
 @Composable
 fun RadioButtons(
-    onRadioButtonSelected: (Boolean) -> Unit
+    selectedOption: Boolean?,
+    onRadioButtonSelected: (Boolean?) -> Unit
 ) {
     val yesText = stringResource(id = R.string.yes)
     val noText = stringResource(id = R.string.no)
+
+    val resetRadioButtons = selectedOption == null
+
     val radioButtons = remember {
         mutableStateListOf(
             ToggleableInfo(
-                isChecked = true,
+//                isChecked = false,
+                isChecked = selectedOption == true && yesText == "Yes",
                 text = yesText
             ),
             ToggleableInfo(
-                isChecked = false,
+                isChecked = selectedOption == true && noText == "No",
                 text = noText
             )
         )
@@ -40,12 +45,17 @@ fun RadioButtons(
                         isChecked = it.text == info.text
                     )
                 }
+                if (!resetRadioButtons) {
+                    onRadioButtonSelected(info.text == yesText)
+                }
             }
         ) {
             RadioButton(
                 selected = info.isChecked,
                 onClick = {
-                    onRadioButtonSelected(info.isChecked)
+                    if (!resetRadioButtons) {
+                        onRadioButtonSelected(info.text == yesText)
+                    }
                     radioButtons.replaceAll {
                         it.copy(
                             isChecked = it.text == info.text

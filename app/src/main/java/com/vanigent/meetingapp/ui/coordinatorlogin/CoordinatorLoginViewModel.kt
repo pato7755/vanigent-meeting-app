@@ -40,7 +40,8 @@ class CoordinatorLoginViewModel @Inject constructor(
     private val _bitmapState = MutableStateFlow(BitmapState())
     val bitmapState = _bitmapState.asStateFlow()
 
-    private val radioButtonSelection = MutableStateFlow(true)
+    private val _radioButtonSelection = MutableStateFlow<Boolean?>(null)
+    val radioButtonSelection = _radioButtonSelection.asStateFlow()
 
     private val _extractedTextState = MutableStateFlow(
         ExtractedTextState(
@@ -100,8 +101,8 @@ class CoordinatorLoginViewModel @Inject constructor(
         }
     }
 
-    fun radioButtonSelection(selection: Boolean) {
-        radioButtonSelection.value = selection
+    fun setRadioButtonSelection(selection: Boolean?) {
+        _radioButtonSelection.value = selection
     }
 
     fun updateReceiptDetails(extractedText: MutableMap<String, String>, bitmap: Bitmap) {
@@ -148,12 +149,19 @@ class CoordinatorLoginViewModel @Inject constructor(
 
     fun saveMeetingDetails(onMeetingIdReceived: (String) -> Unit) {
 
-        val officeName = _searchBarState.value.searchString
+        val address = _searchBarState.value.selectedResultsDisplay
         viewModelScope.launch(Dispatchers.IO) {
             val meetingId = saveMeetingUseCase.invoke(
                 meeting = Meeting(
-                    officeLocation = officeName ?: "",
-                    coordinatorWillConsumeFood = radioButtonSelection.value,
+                    address = address ?: Address(
+                        physicianName = "",
+                        officeName = "",
+                        lineOne = "",
+                        city = "",
+                        state = "",
+                        country = "",
+                    ),
+                    coordinatorWillConsumeFood = radioButtonSelection.value ?: false,
                     receipt = extractedTextStateToReceipts(_extractedTextState.value),
                     attendee = listOf()
                 )

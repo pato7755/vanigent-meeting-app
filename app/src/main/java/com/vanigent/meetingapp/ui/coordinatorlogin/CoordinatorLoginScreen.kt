@@ -98,7 +98,7 @@ fun CoordinatorLoginScreen(
                             .fillMaxWidth()
                     ) {
                         RadioButtonCard(
-                            viewModel::radioButtonSelection
+//                            viewModel::radioButtonSelection
                         )
 
                         extractedTextState.receiptItems.forEachIndexed { index, receiptItem ->
@@ -356,7 +356,8 @@ fun AddressDetailsBox(
 
 @Composable
 fun RadioButtonCard(
-    onRadioButtonSelected: (Boolean) -> Unit
+//    onRadioButtonSelected: (Boolean) -> Unit,
+    viewModel: CoordinatorLoginViewModel = hiltViewModel()
 ) {
     Card(
         modifier = Modifier
@@ -380,7 +381,11 @@ fun RadioButtonCard(
                 style = MaterialTheme.typography.bodyLarge
             )
 
-            RadioButtons(onRadioButtonSelected = onRadioButtonSelected)
+            RadioButtons(
+                selectedOption = false
+            ) {
+                viewModel.setRadioButtonSelection(it)
+            }
         }
     }
 
