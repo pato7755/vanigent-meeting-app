@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -78,44 +79,58 @@ fun AttendeesLogoutScreen(
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .weight(0.4f)
                 .fillMaxWidth()
         ) {
-            SummarySection(
-                numberOfAttendees = numberOfAttendees,
-                costOfMeal = costOfMeal,
-                numberOfThoseWhoAte = numberOfThoseWhoAte,
-                averageCostOfMeal = averageCostOfMeal
-            )
+            item {
 
-            CustomCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .wrapContentHeight(),
-                contentColor = Color.Red,
-                isVisible = !isCostPerAttendeeWithinLimit
-            ) {
-                Text(
-                    text = stringResource(R.string.add_missing_attendees),
-                    color = Color.White
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    SummarySection(
+                        numberOfAttendees = numberOfAttendees,
+                        costOfMeal = costOfMeal,
+                        numberOfThoseWhoAte = numberOfThoseWhoAte,
+                        averageCostOfMeal = averageCostOfMeal
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    CustomCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight(),
+                        contentColor = Color.Red,
+                        isVisible = !isCostPerAttendeeWithinLimit
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(8.dp),
+                            text = stringResource(R.string.add_missing_attendees),
+                            color = Color.White,
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedTextField(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight(),
+                        label = { Text(stringResource(id = R.string.add_comments)) },
+                        value = commentsState.comment,
+                        minLines = 4,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                        onValueChange = {
+                            viewModel.onCommentsChanged(it)
+                        },
+                        isError = commentsState.isValid?.not() == true
+                    )
+
+                }
             }
-
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth().wrapContentHeight(),
-                label = { Text(stringResource(id = R.string.add_comments)) },
-                value = commentsState.comment,
-                minLines = 4,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                onValueChange = {
-                    viewModel.onCommentsChanged(it)
-                },
-                isError = commentsState.isValid?.not() == true
-            )
-
         }
     }
 
@@ -128,11 +143,12 @@ fun SummarySection(
     numberOfThoseWhoAte: Int,
     averageCostOfMeal: Double,
 ) {
+
+
     CustomCard(
         modifier = Modifier.fillMaxWidth(),
     ) {
         SectionHeader(title = stringResource(R.string.statistics))
-
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
