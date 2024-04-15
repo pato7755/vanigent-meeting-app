@@ -11,6 +11,7 @@ import com.vanigent.meetingapp.domain.model.Meeting
 import com.vanigent.meetingapp.domain.model.Receipt
 import com.vanigent.meetingapp.domain.model.SampleAddresses
 import com.vanigent.meetingapp.domain.usecase.SaveMeetingUseCase
+import com.vanigent.meetingapp.ui.common.stateholders.RadioButtonState
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.BitmapState
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.ExtractedTextState
 import com.vanigent.meetingapp.ui.coordinatorlogin.stateholders.ReceiptItem
@@ -40,7 +41,7 @@ class CoordinatorLoginViewModel @Inject constructor(
     private val _bitmapState = MutableStateFlow(BitmapState())
     val bitmapState = _bitmapState.asStateFlow()
 
-    private val _radioButtonSelection = MutableStateFlow<Boolean?>(null)
+    private val _radioButtonSelection = MutableStateFlow(RadioButtonState(null))
     val radioButtonSelection = _radioButtonSelection.asStateFlow()
 
     private val _extractedTextState = MutableStateFlow(
@@ -102,7 +103,22 @@ class CoordinatorLoginViewModel @Inject constructor(
     }
 
     fun setRadioButtonSelection(selection: Boolean?) {
-        _radioButtonSelection.value = selection
+        _radioButtonSelection.update { state ->
+            state.copy(
+                radioButtonState = selection,
+                clearSelection = false
+            )
+        }
+        Timber.d("_radioButtonSelection.value - ${_radioButtonSelection.value.radioButtonState}")
+    }
+
+    fun resetRadioButtonSelection() {
+        _radioButtonSelection.update { state ->
+            state.copy(
+                radioButtonState = null,
+                clearSelection = true
+            )
+        }
     }
 
     fun updateReceiptDetails(extractedText: MutableMap<String, String>, bitmap: Bitmap) {
@@ -161,7 +177,7 @@ class CoordinatorLoginViewModel @Inject constructor(
                         state = "",
                         country = "",
                     ),
-                    coordinatorWillConsumeFood = radioButtonSelection.value ?: false,
+                    coordinatorWillConsumeFood = _radioButtonSelection.value.radioButtonState ?: false,
                     receipt = extractedTextStateToReceipts(_extractedTextState.value),
                     attendee = listOf()
                 )

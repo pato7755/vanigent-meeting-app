@@ -12,30 +12,47 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.vanigent.meetingapp.R
 import com.vanigent.meetingapp.ui.settings.ToggleableInfo
+import timber.log.Timber
 
 @Composable
 fun RadioButtons(
     selectedOption: Boolean?,
-    onRadioButtonSelected: (Boolean?) -> Unit
+    clearSelection: Boolean,
+    onRadioButtonSelected: (Boolean?) -> Unit,
 ) {
     val yesText = stringResource(id = R.string.yes)
     val noText = stringResource(id = R.string.no)
 
-    val resetRadioButtons = selectedOption == null
+    Timber.d("selectedOption - $selectedOption")
+    Timber.d("clearSelection - $clearSelection")
 
     val radioButtons = remember {
         mutableStateListOf(
             ToggleableInfo(
-//                isChecked = false,
                 isChecked = selectedOption == true && yesText == "Yes",
                 text = yesText
             ),
             ToggleableInfo(
-                isChecked = selectedOption == true && noText == "No",
+                isChecked = selectedOption == false && noText == "No",
                 text = noText
             )
         )
     }
+
+    if (clearSelection) {
+        // Clear the selection
+        radioButtons.forEach { it.isChecked = false }
+    } else {
+        // Update the selection based on the selectedOption
+        radioButtons.forEach { info ->
+            info.isChecked = when (info.text) {
+                yesText -> selectedOption == true
+                noText -> selectedOption == false
+                else -> false
+            }
+        }
+    }
+
     radioButtons.forEachIndexed { _, info ->
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -45,17 +62,13 @@ fun RadioButtons(
                         isChecked = it.text == info.text
                     )
                 }
-                if (!resetRadioButtons) {
-                    onRadioButtonSelected(info.text == yesText)
-                }
+                onRadioButtonSelected(info.text == yesText)
             }
         ) {
             RadioButton(
                 selected = info.isChecked,
                 onClick = {
-                    if (!resetRadioButtons) {
-                        onRadioButtonSelected(info.text == yesText)
-                    }
+                    onRadioButtonSelected(info.text == yesText)
                     radioButtons.replaceAll {
                         it.copy(
                             isChecked = it.text == info.text
@@ -65,6 +78,5 @@ fun RadioButtons(
             )
             Text(text = info.text)
         }
-
     }
 }

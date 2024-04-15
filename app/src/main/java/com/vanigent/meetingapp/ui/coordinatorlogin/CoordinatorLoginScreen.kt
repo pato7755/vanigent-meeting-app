@@ -71,6 +71,7 @@ fun CoordinatorLoginScreen(
     onContinueButtonPressed: (String) -> Unit,
 ) {
     val extractedTextState by viewModel.extractedTextState.collectAsStateWithLifecycle()
+    val radioButtonState by viewModel.radioButtonSelection.collectAsStateWithLifecycle()
 
     Row(
         modifier = Modifier
@@ -98,7 +99,8 @@ fun CoordinatorLoginScreen(
                             .fillMaxWidth()
                     ) {
                         RadioButtonCard(
-//                            viewModel::radioButtonSelection
+                            selectedOption = radioButtonState.radioButtonState,
+                            clearSelection = radioButtonState.clearSelection
                         )
 
                         extractedTextState.receiptItems.forEachIndexed { index, receiptItem ->
@@ -357,6 +359,8 @@ fun AddressDetailsBox(
 @Composable
 fun RadioButtonCard(
 //    onRadioButtonSelected: (Boolean) -> Unit,
+    selectedOption: Boolean?,
+    clearSelection: Boolean,
     viewModel: CoordinatorLoginViewModel = hiltViewModel()
 ) {
     Card(
@@ -382,7 +386,8 @@ fun RadioButtonCard(
             )
 
             RadioButtons(
-                selectedOption = false
+                selectedOption = selectedOption,
+                clearSelection = clearSelection
             ) {
                 viewModel.setRadioButtonSelection(it)
             }

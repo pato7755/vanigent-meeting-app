@@ -2,7 +2,6 @@ package com.vanigent.meetingapp.util
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.os.Environment
 import android.widget.Toast
 import com.itextpdf.io.font.FontConstants
 import com.itextpdf.kernel.font.PdfFontFactory.createFont
@@ -57,8 +56,7 @@ object FileUtilities {
         comments: String,
         meetingStatistics: Map<String, String>
     ) {
-//        val file = File(context.filesDir, filename)
-        val file = File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), filename)
+        val file = File(context.filesDir, filename)
         val outputStream = FileOutputStream(file)
         val pdfWriter = PdfWriter(outputStream)
         val pdfDocument = PdfDocument(pdfWriter)

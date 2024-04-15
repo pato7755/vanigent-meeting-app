@@ -55,6 +55,7 @@ import com.vanigent.meetingapp.ui.coordinatorlogin.components.RadioButtons
 import com.vanigent.meetingapp.util.Constants.SEVENTY_PERCENT
 import com.vanigent.meetingapp.util.Constants.THIRTY_PERCENT
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @Composable
 fun AttendeesLoginScreen(
@@ -179,12 +180,14 @@ fun AttendeesLoginScreen(
                                 )
 
                                 RadioButtons(
-                                    selectedOption = selectedRadioButtonOption.value
+                                    selectedOption = selectedRadioButtonOption.value,
+                                    clearSelection = false
                                 ) {
+//                                    println("selectedOption - $it")
+                                    Timber.d("selectedOption - $it")
                                     viewModel.setRadioButtonSelection(it)
                                 }
 //                                    onRadioButtonSelected = viewModel::radioButtonSelection
-
 
                                 Spacer(modifier = Modifier.height(16.dp))
 

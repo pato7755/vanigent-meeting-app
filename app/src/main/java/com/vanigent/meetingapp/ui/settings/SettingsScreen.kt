@@ -20,7 +20,7 @@ import com.vanigent.meetingapp.R
 
 
 data class ToggleableInfo(
-    val isChecked: Boolean,
+    var isChecked: Boolean,
     val text: String
 )
 
