@@ -1,6 +1,7 @@
 package com.vanigent.meetingapp.di
 
 import com.vanigent.meetingapp.domain.repository.MeetingRepository
+import com.vanigent.meetingapp.domain.usecase.LoginUseCase
 import com.vanigent.meetingapp.domain.usecase.SaveAttendeeUseCase
 import com.vanigent.meetingapp.domain.usecase.SaveMeetingUseCase
 import dagger.Module
@@ -23,5 +24,11 @@ object UseCaseModule {
     @Singleton
     fun provideSaveMeetingUseCase(repository: MeetingRepository) =
         SaveMeetingUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun provideLoginUseCase(repository: MeetingRepository) =
+        LoginUseCase(repository)
+
 
 }

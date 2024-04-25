@@ -181,7 +181,7 @@ fun LoginFormSection(
                     disabledElevation = 0.dp
                 ),
                 shape = RoundedCornerShape(20.dp),
-                onClick = { onLoginButtonClicked() }
+                onClick = { viewModel.login() }
             ) {
                 Text(text = "SIGN IN")
             }

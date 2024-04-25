@@ -2,12 +2,13 @@ package com.vanigent.meetingapp.domain.repository
 
 import com.vanigent.meetingapp.common.WorkResult
 import com.vanigent.meetingapp.domain.model.Attendee
+import com.vanigent.meetingapp.domain.model.Coordinator
 import com.vanigent.meetingapp.domain.model.Meeting
 import kotlinx.coroutines.flow.Flow
 
 interface MeetingRepository {
 
-    fun login()
+    fun dbSetup()
 
     fun getProfessionalDesignations(): List<String>
 
@@ -18,5 +19,7 @@ interface MeetingRepository {
     suspend fun getMeetings(): Flow<WorkResult<List<Meeting>>>
 
     suspend fun getMeeting(meetingId: Long): Flow<WorkResult<Meeting?>>
+
+    suspend fun login(coordinator: Coordinator): WorkResult<Coordinator>
 
 }

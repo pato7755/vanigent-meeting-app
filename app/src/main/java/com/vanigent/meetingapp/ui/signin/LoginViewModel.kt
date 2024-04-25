@@ -1,18 +1,27 @@
 package com.vanigent.meetingapp.ui.signin
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.vanigent.meetingapp.common.WorkResult
+import com.vanigent.meetingapp.domain.model.Coordinator
 import com.vanigent.meetingapp.domain.repository.MeetingRepository
+import com.vanigent.meetingapp.domain.usecase.LoginUseCase
 import com.vanigent.meetingapp.ui.signin.stateholders.PasswordState
 import com.vanigent.meetingapp.ui.signin.stateholders.UsernameState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val repository: MeetingRepository
+    private val repository: MeetingRepository,
+    private val loginUseCase: LoginUseCase
 ) : ViewModel() {
 
     private val _usernameState = MutableStateFlow(UsernameState())
@@ -22,7 +31,7 @@ class LoginViewModel @Inject constructor(
     val passwordState = _passwordState.asStateFlow()
 
     init {
-        repository.login()
+        repository.dbSetup()
     }
 
     fun onUsernameTextChanged(text: String) {
@@ -38,6 +47,31 @@ class LoginViewModel @Inject constructor(
             state.copy(
                 password = text
             )
+        }
+    }
+
+    fun login() {
+        val coordinator = Coordinator(
+            username = _usernameState.value.username,
+            password = _passwordState.value.password
+        )
+        viewModelScope.launch(Dispatchers.IO) {
+            when (val result = loginUseCase.invoke(coordinator)) {
+                is WorkResult.Success -> {
+                    withContext(Dispatchers.Main) {
+                        result.data.let {
+                            Timber.d("coordinator - $it")
+                        }
+                    }
+                }
+
+                is WorkResult.Error -> {
+                    println(result.message)
+                }
+
+                else -> {
+                }
+            }
         }
     }
 }

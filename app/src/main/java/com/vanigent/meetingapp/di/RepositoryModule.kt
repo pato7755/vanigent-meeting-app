@@ -1,8 +1,12 @@
 package com.vanigent.meetingapp.di
 
+import com.vanigent.meetingapp.data.CoordinatorDao
 import com.vanigent.meetingapp.data.MeetingDao
 import com.vanigent.meetingapp.data.MeetingDatabase
+import com.vanigent.meetingapp.data.remote.RemoteApi
+import com.vanigent.meetingapp.data.repository.EndpointNumberRepositoryImpl
 import com.vanigent.meetingapp.data.repository.MeetingRepositoryImpl
+import com.vanigent.meetingapp.domain.repository.EndpointNumberRepository
 import com.vanigent.meetingapp.domain.repository.MeetingRepository
 import dagger.Module
 import dagger.Provides
@@ -16,7 +20,15 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun providesMeetingRepository(dao: MeetingDao, database: MeetingDatabase): MeetingRepository =
-        MeetingRepositoryImpl(dao, database)
+    fun providesMeetingRepository(
+        dao: MeetingDao,
+        coordinatorDao: CoordinatorDao,
+        remoteApi: RemoteApi,
+        database: MeetingDatabase,
+        endpointNumber: EndpointNumberRepository): MeetingRepository =
+        MeetingRepositoryImpl(dao, coordinatorDao, remoteApi, database, endpointNumber)
+
+    @Provides
+    fun provideEndpointNumberRepository(): EndpointNumberRepository = EndpointNumberRepositoryImpl()
 
 }

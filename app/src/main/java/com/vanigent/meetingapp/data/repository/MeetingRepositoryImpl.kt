@@ -1,23 +1,31 @@
 package com.vanigent.meetingapp.data.repository
 
 import com.vanigent.meetingapp.common.WorkResult
+import com.vanigent.meetingapp.data.CoordinatorDao
 import com.vanigent.meetingapp.data.MeetingDao
 import com.vanigent.meetingapp.data.MeetingDatabase
 import com.vanigent.meetingapp.data.mapper.AttendeeMapper
 import com.vanigent.meetingapp.data.mapper.MeetingMapper
+import com.vanigent.meetingapp.data.remote.RemoteApi
 import com.vanigent.meetingapp.domain.model.Attendee
+import com.vanigent.meetingapp.domain.model.Coordinator
 import com.vanigent.meetingapp.domain.model.Meeting
+import com.vanigent.meetingapp.domain.repository.EndpointNumberRepository
 import com.vanigent.meetingapp.domain.repository.MeetingRepository
+import com.vanigent.meetingapp.util.Constants.LOGIN_URL
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 import javax.inject.Inject
 
 class MeetingRepositoryImpl @Inject constructor(
-    private val dao: MeetingDao,
-    private val database: MeetingDatabase
+    private val meetingDao: MeetingDao,
+    private val coordinatorDao: CoordinatorDao,
+    private val remoteApi: RemoteApi,
+    private val database: MeetingDatabase,
+    private val endpointNumberRepository: EndpointNumberRepository
 ) : MeetingRepository {
-    override fun login() {
+    override fun dbSetup() {
         if (!database.isOpen) {
             Timber.d("Opening database...")
             database.openHelper.writableDatabase
@@ -50,11 +58,11 @@ class MeetingRepositoryImpl @Inject constructor(
         mappedMeeting.receipts.map {
             println("mappedMeeting - ${it.receiptItems}")
         }
-        return dao.insertMeeting(MeetingMapper.mapToEntity(meeting))
+        return meetingDao.insertMeeting(MeetingMapper.mapToEntity(meeting))
     }
 
     override suspend fun addAttendeeToMeeting(meetingId: Long, attendee: Attendee) {
-        val meeting = dao.getMeetingById(meetingId.toString())
+        val meeting = meetingDao.getMeetingById(meetingId.toString())
         val updatedAttendee = meeting?.attendees?.toMutableList()?.apply {
             add(AttendeeMapper.mapToEntity(attendee))
         }
@@ -65,20 +73,36 @@ class MeetingRepositoryImpl @Inject constructor(
             )
         }
 
-        updatedMeeting?.let { dao.updateMeeting(it) }
+        updatedMeeting?.let { meetingDao.updateMeeting(it) }
     }
 
     override suspend fun getMeetings(): Flow<WorkResult<List<Meeting>>> = flow {
         emit(WorkResult.Loading())
-        val allMeetings = dao.getAllMeetings().map { MeetingMapper.mapToDomainWithoutImages(it) }
+        val allMeetings = meetingDao.getAllMeetings().map { MeetingMapper.mapToDomainWithoutImages(it) }
         emit(WorkResult.Success(allMeetings))
     }
 
     override suspend fun getMeeting(meetingId: Long): Flow<WorkResult<Meeting?>> = flow {
         emit(WorkResult.Loading())
-        val meeting = dao.getMeetingById(meetingId.toString())
+        val meeting = meetingDao.getMeetingById(meetingId.toString())
             ?.let { MeetingMapper.mapToDomainWithoutImages(it) }
         emit(WorkResult.Success(meeting))
+    }
 
+    override suspend fun login(coordinator: Coordinator): WorkResult<Coordinator> = try {
+        val loginUrl = String.format(LOGIN_URL, endpointNumberRepository.loginEndpointNumber())
+
+        val response = remoteApi.login(loginUrl, coordinator)
+//        response.
+//        val remoteApi = providesRemoteApi(retrofitBuilder, endpointNumber)
+        WorkResult.Success(
+            Coordinator(
+                username = coordinator.username,
+                password = coordinator.password
+            )
+        )
+    } catch (ex: Exception) {
+        Timber.e(ex.localizedMessage)
+        WorkResult.Error("An error occurred while logging in")
     }
 }
