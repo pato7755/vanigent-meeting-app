@@ -27,11 +27,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,7 +48,6 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -50,6 +55,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vanigent.meetingapp.R
 import com.vanigent.meetingapp.util.Constants
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
@@ -57,41 +63,65 @@ fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel()
 ) {
 
-    Row(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxHeight()
-                .weight(1f)
-        ) {
-            LoginFormSection(
-                {
-                    onLoginButtonClicked()
-                }
-            )
-        }
+    val loginScreenState by viewModel.screenState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
-        Column(
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+    ) { paddingValues ->
+
+        Row(
             modifier = Modifier
                 .fillMaxSize()
-                .weight(1f)
+                .padding(paddingValues = paddingValues)
         ) {
-            ImageSection()
-        }
+            Column(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(1f)
+            ) {
+                LoginFormSection(
+                    navigateOnLoginSuccess = onLoginButtonClicked
+                )
 
+
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+            ) {
+                ImageSection()
+            }
+
+        }
+    }
+
+    if (loginScreenState.snackBarVisibility) {
+        LaunchedEffect(Unit) {
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(
+                    message = loginScreenState.errorMessage,
+                    duration = SnackbarDuration.Short
+                )
+            }
+        }
+        viewModel.resetSnackBarVisibility()
     }
 }
 
 @Composable
 fun LoginFormSection(
-    onLoginButtonClicked: () -> Unit,
+    navigateOnLoginSuccess: () -> Unit,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
 
     val usernameState by viewModel.usernameState.collectAsStateWithLifecycle()
     val passwordState by viewModel.passwordState.collectAsStateWithLifecycle()
     var isPasswordVisible by remember { mutableStateOf(false) }
+    val screenState = viewModel.screenState.collectAsStateWithLifecycle()
 
     val trailingIcon = @Composable {
         IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
@@ -184,6 +214,11 @@ fun LoginFormSection(
                 onClick = { viewModel.login() }
             ) {
                 Text(text = "SIGN IN")
+            }
+            LaunchedEffect(screenState.value.loginState) {
+                if (screenState.value.loginState) {
+                    navigateOnLoginSuccess()
+                }
             }
 
         }

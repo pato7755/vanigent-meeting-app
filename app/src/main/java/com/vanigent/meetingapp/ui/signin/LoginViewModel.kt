@@ -6,6 +6,7 @@ import com.vanigent.meetingapp.common.WorkResult
 import com.vanigent.meetingapp.domain.model.Coordinator
 import com.vanigent.meetingapp.domain.repository.MeetingRepository
 import com.vanigent.meetingapp.domain.usecase.LoginUseCase
+import com.vanigent.meetingapp.ui.signin.stateholders.LoginScreenState
 import com.vanigent.meetingapp.ui.signin.stateholders.PasswordState
 import com.vanigent.meetingapp.ui.signin.stateholders.UsernameState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,7 +16,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,6 +29,9 @@ class LoginViewModel @Inject constructor(
 
     private val _passwordState = MutableStateFlow(PasswordState())
     val passwordState = _passwordState.asStateFlow()
+
+    private val _screenState = MutableStateFlow(LoginScreenState())
+    val screenState = _screenState.asStateFlow()
 
     init {
         repository.dbSetup()
@@ -59,19 +62,36 @@ class LoginViewModel @Inject constructor(
             when (val result = loginUseCase.invoke(coordinator)) {
                 is WorkResult.Success -> {
                     withContext(Dispatchers.Main) {
-                        result.data.let {
-                            Timber.d("coordinator - $it")
+                        _screenState.update { state ->
+                            state.copy(
+                                loginState = true
+                            )
                         }
                     }
                 }
 
                 is WorkResult.Error -> {
-                    println(result.message)
+
+                    _screenState.update { state ->
+                        state.copy(
+                            loginState = false,
+                            snackBarVisibility = true,
+                            errorMessage = result.message ?: "An error occurred"
+                        )
+                    }
                 }
 
                 else -> {
                 }
             }
+        }
+    }
+
+    fun resetSnackBarVisibility() {
+        _screenState.update { state ->
+            state.copy(
+                snackBarVisibility = false
+            )
         }
     }
 }

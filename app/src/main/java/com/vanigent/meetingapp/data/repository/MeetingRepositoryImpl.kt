@@ -78,7 +78,8 @@ class MeetingRepositoryImpl @Inject constructor(
 
     override suspend fun getMeetings(): Flow<WorkResult<List<Meeting>>> = flow {
         emit(WorkResult.Loading())
-        val allMeetings = meetingDao.getAllMeetings().map { MeetingMapper.mapToDomainWithoutImages(it) }
+        val allMeetings =
+            meetingDao.getAllMeetings().map { MeetingMapper.mapToDomainWithoutImages(it) }
         emit(WorkResult.Success(allMeetings))
     }
 
@@ -90,17 +91,17 @@ class MeetingRepositoryImpl @Inject constructor(
     }
 
     override suspend fun login(coordinator: Coordinator): WorkResult<Coordinator> = try {
-        val loginUrl = String.format(LOGIN_URL, endpointNumberRepository.loginEndpointNumber())
-
-        val response = remoteApi.login(loginUrl, coordinator)
-//        response.
-//        val remoteApi = providesRemoteApi(retrofitBuilder, endpointNumber)
-        WorkResult.Success(
-            Coordinator(
-                username = coordinator.username,
-                password = coordinator.password
+        val response = remoteApi.login(LOGIN_URL, coordinator)
+        if (response.isSuccessful) {
+            WorkResult.Success(
+                Coordinator(
+                    username = coordinator.username,
+                    password = coordinator.password
+                )
             )
-        )
+        } else {
+            WorkResult.Error(message = "This user does not exist")
+        }
     } catch (ex: Exception) {
         Timber.e(ex.localizedMessage)
         WorkResult.Error("An error occurred while logging in")

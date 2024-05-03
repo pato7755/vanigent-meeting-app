@@ -36,13 +36,6 @@ object NetworkModule {
         .addConverterFactory(GsonConverterFactory.create())
 
     @Provides
-    @Named("number")
-    fun provideNumber(): String {
-        // Return the endpoint number based on your logic or configuration
-        return "77" // Example number, you should retrieve this dynamically
-    }
-
-    @Provides
     @Singleton
     fun providesRemoteApi(retrofitBuilder: Retrofit.Builder): RemoteApi {
         return retrofitBuilder
