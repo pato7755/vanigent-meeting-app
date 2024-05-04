@@ -89,12 +89,14 @@ class AttendeesLogoutViewModel @Inject constructor(
                         }
 
                         _numberOfAttendees.update {
-                            _meetingState.value.meeting?.attendee?.count() ?: 0
+                            (_meetingState.value.meeting?.attendee?.count() ?: 0) + 1
                         }
 
+                        val coordinatorWillConsumeFood = _meetingState.value.meeting?.coordinatorWillConsumeFood ?: false
+                        val countOfAttendeesWhoAte = _meetingState.value.meeting?.attendee?.count { it.attendeeWillConsumeFood } ?: 0
+
                         _numberOfThoseWhoAte.update {
-                            _meetingState.value.meeting?.attendee?.count { x -> x.attendeeWillConsumeFood }
-                                ?: 0
+                            countOfAttendeesWhoAte + if (coordinatorWillConsumeFood) 1 else 0
                         }
 
                         _costOfMeal.update {
@@ -106,7 +108,7 @@ class AttendeesLogoutViewModel @Inject constructor(
 
                         _averageCostOfMeal.update {
                             _costOfMeal.value.let { total ->
-                                if (total > 0.00) total.div(_numberOfAttendees.value) else 0.00
+                                if (total > 0.00) total.div(_numberOfThoseWhoAte.value) else 0.00
                             }
                         }
 
