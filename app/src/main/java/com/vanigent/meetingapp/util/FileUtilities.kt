@@ -66,7 +66,7 @@ object FileUtilities {
         val normalFont = createFont(FontConstants.HELVETICA)
 
         // Write Meeting data onto the page
-        val title = Paragraph("Meeting ID - 29").setFont(titleFont)
+        val title = Paragraph("Meeting ID - ${meeting.id}").setFont(titleFont)
         document.add(title)
 
         val date = Paragraph("Date of event: ${getCurrentDate()}").setFont(titleFont)

@@ -12,6 +12,7 @@ import com.vanigent.meetingapp.domain.model.Receipt
 object MeetingMapper {
     fun mapToEntity(meeting: Meeting): MeetingEntity {
         return MeetingEntity(
+            id = meeting.id,
             address = AddressEntity(
                 physicianName = meeting.address.physicianName,
                 officeName = meeting.address.officeName,
@@ -42,6 +43,7 @@ object MeetingMapper {
 
     fun mapToDomain(meetingEntity: MeetingEntity): Meeting {
         return Meeting(
+            id = meetingEntity.id ?: 0L,
             address = Address(
                 physicianName = meetingEntity.address.physicianName,
                 officeName = meetingEntity.address.officeName,
@@ -72,6 +74,7 @@ object MeetingMapper {
 
     fun mapToDomainWithoutImages(meetingEntity: MeetingEntity): Meeting {
         return Meeting(
+            id = meetingEntity.id ?: 0L,
             address = Address(
                 physicianName = meetingEntity.address.physicianName,
                 officeName = meetingEntity.address.officeName,

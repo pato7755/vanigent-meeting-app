@@ -1,6 +1,7 @@
 package com.vanigent.meetingapp.domain.model
 
 data class Meeting(
+    val id: Long,
     val address: Address,
     val coordinatorWillConsumeFood: Boolean,
     val receipt: List<Receipt>,

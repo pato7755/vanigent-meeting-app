@@ -132,10 +132,6 @@ class AttendeesLoginViewModel @Inject constructor(
         }
     }
 
-//    fun radioButtonSelection(selection: Boolean) {
-//        radioButtonSelection.value = selection
-//    }
-
     private fun updateIsFormBlank(isFormBlank: Boolean) {
         _isFormBlankState.update {
             isFormBlank

@@ -9,6 +9,7 @@ import com.vanigent.meetingapp.domain.usecase.FetchMeetingsUseCase
 import com.vanigent.meetingapp.ui.attendeeslogout.stateholders.CommentState
 import com.vanigent.meetingapp.ui.attendeeslogout.stateholders.MeetingState
 import com.vanigent.meetingapp.util.Constants.MAXIMUM_ALLOWED_COST_PER_MEAL
+import com.vanigent.meetingapp.util.DateUtilities.getCurrentDate
 import com.vanigent.meetingapp.util.FileUtilities.generatePDF
 import com.vanigent.meetingapp.util.Utilities.removeDollar
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
@@ -88,11 +90,10 @@ class AttendeesLogoutViewModel @Inject constructor(
                             )
                         }
 
-                        _numberOfAttendees.update {
-                            (_meetingState.value.meeting?.attendee?.count() ?: 0) + 1
-                        }
+                        _numberOfAttendees.update { (_meetingState.value.meeting?.attendee?.count() ?: 0) + 1 }
 
-                        val coordinatorWillConsumeFood = _meetingState.value.meeting?.coordinatorWillConsumeFood ?: false
+                        val coordinatorWillConsumeFood = _meetingState.value.meeting?.coordinatorWillConsumeFood
+                            ?: false
                         val countOfAttendeesWhoAte = _meetingState.value.meeting?.attendee?.count { it.attendeeWillConsumeFood } ?: 0
 
                         _numberOfThoseWhoAte.update {
@@ -128,7 +129,7 @@ class AttendeesLogoutViewModel @Inject constructor(
     }
 
     fun onContinuePressed() {
-        val filename = "Default.pdf"
+        val filename = "Meeting " + meetingId.value + "(${getCurrentDate()}).pdf"
         val meetingStatistics = mapOf(
             "Number of attendees" to _numberOfAttendees.value.toString(),
             "Number of those who consumed food" to _numberOfThoseWhoAte.value.toString(),

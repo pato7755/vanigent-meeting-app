@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "meeting", indices = [Index(value = ["id"], unique = true)])
 data class MeetingEntity(
 
-    @PrimaryKey val id: Int? = null,
+    @PrimaryKey val id: Long? = null,
     @ColumnInfo(name = "location")
     val address: AddressEntity,
     @ColumnInfo(name = "coordinator_will_consume_food")
