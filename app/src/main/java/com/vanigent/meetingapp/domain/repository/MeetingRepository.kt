@@ -22,4 +22,6 @@ interface MeetingRepository {
 
     suspend fun login(coordinator: Coordinator): WorkResult<Coordinator>
 
+    suspend fun authenticateCoordinator(userPassword: String): Boolean
+
 }

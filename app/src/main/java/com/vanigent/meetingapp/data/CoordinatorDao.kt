@@ -14,4 +14,7 @@ interface CoordinatorDao {
 
     @Query("SELECT * FROM coordinator limit 1")
     suspend fun fetchCoordinatorDetails(): CoordinatorEntity
+
+    @Query("DELETE FROM coordinator")
+    suspend fun deleteLoginCredentials()
 }

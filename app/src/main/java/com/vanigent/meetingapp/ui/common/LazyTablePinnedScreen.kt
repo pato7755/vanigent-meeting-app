@@ -177,6 +177,7 @@ private data class Settings(
 fun meetings(): List<Meeting> {
     return listOf(
         Meeting(
+            id = 1,
             address = Address(
                 physicianName = "",
                 officeName = "",
@@ -199,6 +200,7 @@ fun meetings(): List<Meeting> {
             )
         ),
         Meeting(
+            id = 2,
             address = Address(
                 physicianName = "",
                 officeName = "",
@@ -221,6 +223,7 @@ fun meetings(): List<Meeting> {
             )
         ),
         Meeting(
+            id = 3,
             address = Address(
                 physicianName = "",
                 officeName = "",

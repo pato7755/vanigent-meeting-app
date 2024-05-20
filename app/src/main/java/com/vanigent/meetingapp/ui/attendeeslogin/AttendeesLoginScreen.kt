@@ -73,9 +73,9 @@ fun AttendeesLoginScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val isFormBlank by viewModel.isFormBlankState.collectAsStateWithLifecycle()
-    val dialogPassword by viewModel.dialogPassword.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val selectedRadioButtonOption = viewModel.radioButtonSelection.collectAsStateWithLifecycle()
+    val passwordState by viewModel.coordinatorPassword.collectAsStateWithLifecycle()
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
@@ -183,7 +183,6 @@ fun AttendeesLoginScreen(
                                     selectedOption = selectedRadioButtonOption.value,
                                     clearSelection = false
                                 ) {
-//                                    println("selectedOption - $it")
                                     Timber.d("selectedOption - $it")
                                     viewModel.setRadioButtonSelection(it)
                                 }
@@ -202,12 +201,16 @@ fun AttendeesLoginScreen(
                                     viewModel.toggleDialogVisibility()
                                 },
                                 onConfirmation = {
-                                    viewModel.toggleDialogVisibility()
                                     viewModel.getMeetingId { meetingId ->
-                                        onContinueButtonPressed(meetingId)
+                                        if (passwordState.isValid == true) {
+                                            viewModel.toggleDialogVisibility()
+                                            onContinueButtonPressed(meetingId)
+                                        } else {
+                                            Toast.makeText(context, "Wrong password", Toast.LENGTH_SHORT).show()
+                                        }
                                     }
                                 },
-                                passwordText = dialogPassword.password,
+                                passwordText = passwordState.password,
                                 modifier = Modifier.background(
                                     color = Color.White
                                 ),
@@ -228,18 +231,10 @@ fun AttendeesLoginScreen(
                                 viewModel.performFieldValidations { error ->
                                     when {
                                         error.isProfessionalDesignationValid == false -> {
-                                            Toast.makeText(
-                                                context,
-                                                errorTextDesignation,
-                                                Toast.LENGTH_SHORT
-                                            ).show()
+                                            Toast.makeText(context, errorTextDesignation, Toast.LENGTH_SHORT).show()
                                         }
                                         error.isSignatureValid == false -> {
-                                            Toast.makeText(
-                                                context,
-                                                errorTextSignature,
-                                                Toast.LENGTH_SHORT
-                                            ).show()
+                                            Toast.makeText(context, errorTextSignature, Toast.LENGTH_SHORT).show()
                                         }
                                     }
                                 }

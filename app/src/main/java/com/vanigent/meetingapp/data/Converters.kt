@@ -6,6 +6,7 @@ import com.google.gson.reflect.TypeToken
 import com.vanigent.meetingapp.data.local.entity.AddressEntity
 import com.vanigent.meetingapp.data.local.entity.AttendeeEntity
 import com.vanigent.meetingapp.data.local.entity.ReceiptEntity
+import com.vanigent.meetingapp.util.EncryptedData
 
 class Converters {
     private val gson = Gson()
@@ -44,4 +45,15 @@ class Converters {
     fun toAddress(addressString: String): AddressEntity {
         return gson.fromJson(addressString, AddressEntity::class.java)
     }
+
+    @TypeConverter
+    fun fromEncryptedData(encryptedData: EncryptedData): String {
+        return gson.toJson(encryptedData)
+    }
+
+    @TypeConverter
+    fun toEncryptedData(encryptedDataString: String): EncryptedData {
+        return gson.fromJson(encryptedDataString, EncryptedData::class.java)
+    }
+
 }

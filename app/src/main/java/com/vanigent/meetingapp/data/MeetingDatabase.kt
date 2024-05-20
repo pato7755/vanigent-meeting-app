@@ -8,7 +8,7 @@ import com.vanigent.meetingapp.data.local.entity.MeetingEntity
 
 @Database(
     entities = [MeetingEntity::class, CoordinatorEntity::class],
-    version = 2
+    version = 4
 )
 @TypeConverters(Converters::class)
 abstract class MeetingDatabase : RoomDatabase() {

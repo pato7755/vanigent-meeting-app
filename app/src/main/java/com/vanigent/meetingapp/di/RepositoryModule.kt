@@ -6,6 +6,7 @@ import com.vanigent.meetingapp.data.MeetingDatabase
 import com.vanigent.meetingapp.data.remote.RemoteApi
 import com.vanigent.meetingapp.data.repository.EndpointNumberRepositoryImpl
 import com.vanigent.meetingapp.data.repository.MeetingRepositoryImpl
+import com.vanigent.meetingapp.domain.repository.CryptoManager
 import com.vanigent.meetingapp.domain.repository.EndpointNumberRepository
 import com.vanigent.meetingapp.domain.repository.MeetingRepository
 import dagger.Module
@@ -25,8 +26,8 @@ object RepositoryModule {
         coordinatorDao: CoordinatorDao,
         remoteApi: RemoteApi,
         database: MeetingDatabase,
-        endpointNumber: EndpointNumberRepository): MeetingRepository =
-        MeetingRepositoryImpl(dao, coordinatorDao, remoteApi, database, endpointNumber)
+        cryptoManager: CryptoManager): MeetingRepository =
+        MeetingRepositoryImpl(dao, coordinatorDao, remoteApi, database, cryptoManager)
 
     @Provides
     fun provideEndpointNumberRepository(): EndpointNumberRepository = EndpointNumberRepositoryImpl()

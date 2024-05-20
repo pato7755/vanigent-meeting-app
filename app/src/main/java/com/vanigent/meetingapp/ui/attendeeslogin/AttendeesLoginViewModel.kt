@@ -11,7 +11,7 @@ import com.vanigent.meetingapp.domain.model.Attendee
 import com.vanigent.meetingapp.domain.repository.MeetingRepository
 import com.vanigent.meetingapp.domain.usecase.SaveAttendeeUseCase
 import com.vanigent.meetingapp.ui.attendeeslogin.components.Line
-import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.DialogPasswordState
+import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.PasswordState
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.DialogState
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.ErrorState
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.FirstNameState
@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import timber.log.Timber
+import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
@@ -62,8 +62,8 @@ class AttendeesLoginViewModel @Inject constructor(
     private val _isFormBlankState = MutableStateFlow(true)
     val isFormBlankState = _isFormBlankState
 
-    private val _dialogPassword = MutableStateFlow(DialogPasswordState())
-    val dialogPassword = _dialogPassword.asStateFlow()
+    private val _coordinatorPassword = MutableStateFlow(PasswordState())
+    val coordinatorPassword = _coordinatorPassword.asStateFlow()
 
     private val _signatureLines = mutableStateListOf<Line>()
     val signatureLines = _signatureLines
@@ -125,7 +125,7 @@ class AttendeesLoginViewModel @Inject constructor(
     }
 
     fun onPasswordTextChanged(text: String) {
-        _dialogPassword.update { state ->
+        _coordinatorPassword.update { state ->
             state.copy(
                 password = text
             )
@@ -281,6 +281,16 @@ class AttendeesLoginViewModel @Inject constructor(
     }
 
     fun getMeetingId(onMeetingIdReceived: (String) -> Unit) {
-        onMeetingIdReceived(meetingId.value)
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = meetingRepository.authenticateCoordinator(_coordinatorPassword.value.password)
+            withContext(Dispatchers.Main) {
+                _coordinatorPassword.update { state ->
+                    state.copy(
+                        isValid = result
+                    )
+                }
+                onMeetingIdReceived(meetingId.value)
+            }
+        }
     }
 }
