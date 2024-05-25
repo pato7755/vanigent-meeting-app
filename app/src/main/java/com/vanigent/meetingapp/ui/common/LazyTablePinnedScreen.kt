@@ -57,20 +57,29 @@ fun LazyTablePinnedScreen(
                 modifier = Modifier
                     .align(Alignment.Start)
             ) {
-                items(
-                    count = meeting.attendee.size * columns,
-                    layoutInfo = {
-                        LazyTableItem(
-                            column = it % columns,
-                            row = it / columns + if (settings.showHeader) 1 else 0,
-                        )
-                    },
-                ) {
-                    Cell(
-                        attendee = meeting.attendee[it / columns],
-                        column = it % columns
-                    )
-                }
+                    items(
+                        count = (meeting.attendee.size + 1) * columns, // +1 for the coordinator row
+                        layoutInfo = {
+                            LazyTableItem(
+                                column = it % columns,
+                                row = it / columns + if (settings.showHeader) 1 else 0,
+                            )
+                        },
+                    ) {
+                        if (it / columns == 0) {
+                            CoordinatorCell(
+                                coordinatorFirstName = meeting.coordinatorFirstName,
+                                coordinatorLastName = meeting.coordinatorLastName,
+                                column = it % columns,
+                                meeting.coordinatorWillConsumeFood
+                            )
+                        } else {
+                            Cell(
+                                attendee = meeting.attendee[(it / columns) - 1],
+                                column = it % columns
+                            )
+                        }
+                    }
 
                 if (settings.showHeader) {
                     items(
@@ -83,6 +92,7 @@ fun LazyTablePinnedScreen(
                         },
                     ) {
                         HeaderCell(column = it)
+
                     }
                 }
             }
@@ -113,13 +123,9 @@ private fun Cell(
     column: Int,
 ) {
     val content = when (column) {
-        0 -> {
-            attendee.attendeeFirstName
-        }
+        0 -> { attendee.attendeeFirstName }
 
-        1 -> {
-            attendee.attendeeLastName
-        }
+        1 -> { attendee.attendeeLastName }
 
         2 -> {
             if (attendee.attendeeWillConsumeFood)
@@ -160,10 +166,33 @@ private fun HeaderCell(column: Int) {
                 color = Color.Black
             )
     ) {
-        Text(
-            text = content,
-            color = Color.White
-        )
+        Text(text = content, color = Color.White)
+    }
+}
+
+@Composable
+private fun CoordinatorCell(
+    coordinatorFirstName: String,
+    coordinatorLastName: String,
+    column: Int,
+    coordinatorWillConsumeFood: Boolean
+) {
+    val content = when (column) {
+        0 -> coordinatorFirstName
+        1 -> coordinatorLastName
+        2 -> if (coordinatorWillConsumeFood) "Yes" else "No"
+        else -> "error"
+    }
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .background(colorResource(id = R.color.vanigent_light_green))
+            .border(Dp.Hairline, MaterialTheme.colorScheme.onSurface)
+    ) {
+        if (content.isNotEmpty()) {
+            Text(text = content, color = Color.White)
+        }
     }
 }
 
@@ -197,7 +226,9 @@ fun meetings(): List<Meeting> {
                     attendeeProfessionalDesignation = "PA",
                     attendeeSignature = "".toByteArray()
                 )
-            )
+            ),
+            coordinatorFirstName = "Pierre-Alexandre",
+            coordinatorLastName = "Brault"
         ),
         Meeting(
             id = 2,

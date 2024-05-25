@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vanigent.meetingapp.common.WorkResult
+import com.vanigent.meetingapp.domain.repository.CoordinatorRepository
 import com.vanigent.meetingapp.domain.usecase.FetchMeetingsUseCase
 import com.vanigent.meetingapp.ui.attendeeslogout.stateholders.CommentState
 import com.vanigent.meetingapp.ui.attendeeslogout.stateholders.MeetingState
@@ -12,6 +13,7 @@ import com.vanigent.meetingapp.util.Constants.MAXIMUM_ALLOWED_COST_PER_MEAL
 import com.vanigent.meetingapp.util.DateUtilities.getCurrentDate
 import com.vanigent.meetingapp.util.FileUtilities.generatePDF
 import com.vanigent.meetingapp.util.Utilities.removeDollar
+import com.vanigent.meetingapp.util.Utilities.splitName
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +30,8 @@ import javax.inject.Inject
 class AttendeesLogoutViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val fetchMeetingsUseCase: FetchMeetingsUseCase,
-    private val context: Context
+    private val context: Context,
+    private val coordinatorRepository: CoordinatorRepository
 ) : ViewModel() {
 
     private val meetingId = MutableStateFlow("")
@@ -58,6 +61,7 @@ class AttendeesLogoutViewModel @Inject constructor(
         meetingId.value = savedStateHandle.get<String>("meetingId") ?: ""
         Timber.d("meetingId.value - ${meetingId.value}")
         fetchMeeting(meetingId.value.toLong())
+        fetchCoordinatorName()
     }
 
     fun onCommentsChanged(text: String) {
@@ -94,7 +98,8 @@ class AttendeesLogoutViewModel @Inject constructor(
 
                         val coordinatorWillConsumeFood = _meetingState.value.meeting?.coordinatorWillConsumeFood
                             ?: false
-                        val countOfAttendeesWhoAte = _meetingState.value.meeting?.attendee?.count { it.attendeeWillConsumeFood } ?: 0
+                        val countOfAttendeesWhoAte = _meetingState.value.meeting?.attendee?.count { it.attendeeWillConsumeFood }
+                            ?: 0
 
                         _numberOfThoseWhoAte.update {
                             countOfAttendeesWhoAte + if (coordinatorWillConsumeFood) 1 else 0
@@ -146,6 +151,22 @@ class AttendeesLogoutViewModel @Inject constructor(
             )
         }
 
+    }
+
+    private fun fetchCoordinatorName() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val coordinatorDetails = coordinatorRepository.fetchCoordinatorDetails()
+
+            val (firstName, lastName) = coordinatorDetails.fullName?.splitName()
+                ?: Pair("", "")
+            _meetingState.update { state ->
+                val updatedMeeting = state.meeting?.copy(
+                    coordinatorFirstName = firstName,
+                    coordinatorLastName = lastName
+                )
+                state.copy(meeting = updatedMeeting)
+            }
+        }
     }
 
 }

@@ -4,8 +4,10 @@ import com.vanigent.meetingapp.data.CoordinatorDao
 import com.vanigent.meetingapp.data.MeetingDao
 import com.vanigent.meetingapp.data.MeetingDatabase
 import com.vanigent.meetingapp.data.remote.RemoteApi
+import com.vanigent.meetingapp.data.repository.CoordinatorRepositoryImpl
 import com.vanigent.meetingapp.data.repository.EndpointNumberRepositoryImpl
 import com.vanigent.meetingapp.data.repository.MeetingRepositoryImpl
+import com.vanigent.meetingapp.domain.repository.CoordinatorRepository
 import com.vanigent.meetingapp.domain.repository.CryptoManager
 import com.vanigent.meetingapp.domain.repository.EndpointNumberRepository
 import com.vanigent.meetingapp.domain.repository.MeetingRepository
@@ -31,5 +33,11 @@ object RepositoryModule {
 
     @Provides
     fun provideEndpointNumberRepository(): EndpointNumberRepository = EndpointNumberRepositoryImpl()
+
+    @Provides
+    @Singleton
+    fun provideCoordinatorRepository(
+        coordinatorDao: CoordinatorDao
+    ): CoordinatorRepository = CoordinatorRepositoryImpl(coordinatorDao)
 
 }
