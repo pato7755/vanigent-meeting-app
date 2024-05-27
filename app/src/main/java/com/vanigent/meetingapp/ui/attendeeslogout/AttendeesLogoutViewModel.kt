@@ -6,9 +6,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vanigent.meetingapp.common.WorkResult
 import com.vanigent.meetingapp.domain.repository.CoordinatorRepository
+import com.vanigent.meetingapp.domain.repository.MeetingRepository
 import com.vanigent.meetingapp.domain.usecase.FetchMeetingsUseCase
 import com.vanigent.meetingapp.ui.attendeeslogout.stateholders.CommentState
 import com.vanigent.meetingapp.ui.attendeeslogout.stateholders.MeetingState
+import com.vanigent.meetingapp.ui.attendeeslogout.stateholders.PdfUploadState
 import com.vanigent.meetingapp.util.Constants.MAXIMUM_ALLOWED_COST_PER_MEAL
 import com.vanigent.meetingapp.util.DateUtilities.getCurrentDate
 import com.vanigent.meetingapp.util.FileUtilities.generatePDF
@@ -23,7 +25,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,7 +32,8 @@ class AttendeesLogoutViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val fetchMeetingsUseCase: FetchMeetingsUseCase,
     private val context: Context,
-    private val coordinatorRepository: CoordinatorRepository
+    private val coordinatorRepository: CoordinatorRepository,
+    private val meetingRepository: MeetingRepository
 ) : ViewModel() {
 
     private val meetingId = MutableStateFlow("")
@@ -56,6 +58,9 @@ class AttendeesLogoutViewModel @Inject constructor(
 
     private val _comments = MutableStateFlow(CommentState(""))
     val commentsState = _comments.asStateFlow()
+
+    private val _pdfUploadState = MutableStateFlow(PdfUploadState())
+    val pdfUploadState = _pdfUploadState.asStateFlow()
 
     init {
         meetingId.value = savedStateHandle.get<String>("meetingId") ?: ""
@@ -133,6 +138,24 @@ class AttendeesLogoutViewModel @Inject constructor(
         }
     }
 
+    private fun fetchCoordinatorName() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val coordinatorDetails = coordinatorRepository.fetchCoordinatorDetails()
+
+            withContext(Dispatchers.Main) {
+                val (firstName, lastName) = coordinatorDetails.fullName?.splitName()
+                    ?: Pair("", "")
+                _meetingState.update { state ->
+                    val updatedMeeting = state.meeting?.copy(
+                        coordinatorFirstName = firstName,
+                        coordinatorLastName = lastName
+                    )
+                    state.copy(meeting = updatedMeeting)
+                }
+            }
+        }
+    }
+
     fun onContinuePressed() {
         val filename = "Meeting " + meetingId.value + "(${getCurrentDate()}).pdf"
         val meetingStatistics = mapOf(
@@ -141,32 +164,25 @@ class AttendeesLogoutViewModel @Inject constructor(
             "Total cost of meal" to "$".plus(_costOfMeal.value.toString()),
             "Average cost of meal per attendee" to "$".plus(_averageCostOfMeal.value.toString()),
         )
-        _meetingState.value.meeting?.let {
-            generatePDF(
-                context = context,
-                filename = filename,
-                meeting = it,
-                comments = commentsState.value.comment,
-                meetingStatistics = meetingStatistics
-            )
-        }
 
-    }
-
-    private fun fetchCoordinatorName() {
         viewModelScope.launch(Dispatchers.IO) {
-            val coordinatorDetails = coordinatorRepository.fetchCoordinatorDetails()
-
-            val (firstName, lastName) = coordinatorDetails.fullName?.splitName()
-                ?: Pair("", "")
-            _meetingState.update { state ->
-                val updatedMeeting = state.meeting?.copy(
-                    coordinatorFirstName = firstName,
-                    coordinatorLastName = lastName
+            _meetingState.value.meeting?.let {
+                val generatedPdf = generatePDF(
+                    context = context,
+                    filename = filename,
+                    meeting = it,
+                    comments = commentsState.value.comment,
+                    meetingStatistics = meetingStatistics
                 )
-                state.copy(meeting = updatedMeeting)
+
+                generatedPdf?.let { pdf ->
+                    val result = meetingRepository.uploadPDFToServer(pdf)
+                    _pdfUploadState.update { state ->
+                        state.copy(uploadState = result)
+                    }
+                }
             }
+
         }
     }
-
 }

@@ -14,6 +14,9 @@ import com.itextpdf.layout.element.Paragraph
 import com.itextpdf.layout.element.Table
 import com.vanigent.meetingapp.domain.model.Meeting
 import com.vanigent.meetingapp.util.DateUtilities.getCurrentDate
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
@@ -49,87 +52,102 @@ object FileUtilities {
 
     }
 
+    fun File.toMultipartBodyPart(): MultipartBody.Part {
+        val requestFile = this.asRequestBody("application/pdf".toMediaTypeOrNull())
+        return MultipartBody.Part.createFormData("file", this.name, requestFile)
+    }
+
     fun generatePDF(
         context: Context,
         filename: String,
         meeting: Meeting,
         comments: String,
         meetingStatistics: Map<String, String>
-    ) {
-        val file = File(context.filesDir, filename)
-        val outputStream = FileOutputStream(file)
-        val pdfWriter = PdfWriter(outputStream)
-        val pdfDocument = PdfDocument(pdfWriter)
-        val document = Document(pdfDocument, PageSize.A4)
+    ): File? {
 
-        val titleFont = createFont(FontConstants.HELVETICA_BOLD)
-        val normalFont = createFont(FontConstants.HELVETICA)
+        try {
+            val file = File(context.filesDir, filename)
+            val outputStream = FileOutputStream(file)
+            val pdfWriter = PdfWriter(outputStream)
+            val pdfDocument = PdfDocument(pdfWriter)
+            val document = Document(pdfDocument, PageSize.A4)
 
-        // Write Meeting data onto the page
-        val title = Paragraph("Meeting ID - ${meeting.id}").setFont(titleFont)
-        document.add(title)
+            val titleFont = createFont(FontConstants.HELVETICA_BOLD)
+            val normalFont = createFont(FontConstants.HELVETICA)
 
-        val date = Paragraph("Date of event: ${getCurrentDate()}").setFont(titleFont)
-        document.add(date)
+            // Write Meeting data onto the page
+            val title = Paragraph("Meeting ID - ${meeting.id}").setFont(titleFont)
+            document.add(title)
 
-        val institutionName = Paragraph("Institution name: ${meeting.address.officeName}").setFont(titleFont)
-        document.add(institutionName)
+            val date = Paragraph("Date of event: ${getCurrentDate()}").setFont(titleFont)
+            document.add(date)
 
-        val institutionAddress = Paragraph("Institution address: ${meeting.address.lineOne}").setFont(titleFont)
-        document.add(institutionAddress)
+            val institutionName =
+                Paragraph("Institution name: ${meeting.address.officeName}").setFont(titleFont)
+            document.add(institutionName)
 
-        val physicianName = Paragraph("Physician name: ${meeting.address.physicianName}").setFont(titleFont)
-        document.add(physicianName)
+            val institutionAddress =
+                Paragraph("Institution address: ${meeting.address.lineOne}").setFont(titleFont)
+            document.add(institutionAddress)
 
-        val coordinatorFood = Paragraph(
-            "Did Coordinator Consume Food - " +
-                    if (meeting.coordinatorWillConsumeFood) "Yes" else "No"
-        ).setFont(normalFont)
-        document.add(coordinatorFood)
+            val physicianName =
+                Paragraph("Physician name: ${meeting.address.physicianName}").setFont(titleFont)
+            document.add(physicianName)
 
-        val attendeesTitle = Paragraph("Attendees:").setFont(titleFont)
-        document.add(attendeesTitle)
+            val coordinatorFood = Paragraph(
+                "Did Coordinator Consume Food - " +
+                        if (meeting.coordinatorWillConsumeFood) "Yes" else "No"
+            ).setFont(normalFont)
+            document.add(coordinatorFood)
 
-        val attendeesTableHeaders = listOf(
-            "",
-            "FIRST NAME",
-            "LAST NAME",
-            "PROFESSIONAL \n DESIGNATION",
-            "SIGNATURE",
-            "CONSUME FOOD"
-        )
+            val attendeesTitle = Paragraph("Attendees:").setFont(titleFont)
+            document.add(attendeesTitle)
 
-        // Create table for attendees
-        val attendeesTable = Table(floatArrayOf(20f, 50f, 50f, 50f, 30f, 20f)).useAllAvailableWidth()
-        attendeesTableHeaders.forEach {
-            attendeesTable.addHeaderCell(it)
+            val attendeesTableHeaders = listOf(
+                "",
+                "FIRST NAME",
+                "LAST NAME",
+                "PROFESSIONAL \n DESIGNATION",
+                "SIGNATURE",
+                "CONSUME FOOD"
+            )
+
+            // Create table for attendees
+            val attendeesTable =
+                Table(floatArrayOf(20f, 50f, 50f, 50f, 30f, 20f)).useAllAvailableWidth()
+            attendeesTableHeaders.forEach {
+                attendeesTable.addHeaderCell(it)
+            }
+            meeting.attendee.forEachIndexed { index, attendee ->
+                attendeesTable.addCell(Cell().add(Paragraph("${index + 1}")))
+                attendeesTable.addCell(Cell().add(Paragraph(attendee.attendeeFirstName)))
+                attendeesTable.addCell(Cell().add(Paragraph(attendee.attendeeLastName)))
+                attendeesTable.addCell(Cell().add(Paragraph(attendee.attendeeProfessionalDesignation)))
+                attendeesTable.addCell(Cell().add(Paragraph("")))
+                attendeesTable.addCell(Cell().add(Paragraph(if (attendee.attendeeWillConsumeFood) "Yes" else "No")))
+            }
+            document.add(attendeesTable)
+
+            val meetingStatisticsTitle = Paragraph("Meeting Statistics:").setFont(titleFont)
+            document.add(meetingStatisticsTitle)
+
+            meetingStatistics.forEach { (key, value) ->
+                val item = Paragraph("$key - $value").setFont(normalFont)
+                document.add(item)
+            }
+
+            val generalComments = Paragraph("General Comments: $comments").setFont(titleFont)
+            document.add(generalComments)
+
+            document.close()
+            pdfDocument.close()
+            pdfWriter.close()
+
+            return file
+        } catch(ex: Exception) {
+            ex.printStackTrace()
+            return null
         }
-        meeting.attendee.forEachIndexed { index, attendee ->
-            attendeesTable.addCell(Cell().add(Paragraph("${index + 1}")))
-            attendeesTable.addCell(Cell().add(Paragraph(attendee.attendeeFirstName)))
-            attendeesTable.addCell(Cell().add(Paragraph(attendee.attendeeLastName)))
-            attendeesTable.addCell(Cell().add(Paragraph(attendee.attendeeProfessionalDesignation)))
-            attendeesTable.addCell(Cell().add(Paragraph("")))
-            attendeesTable.addCell(Cell().add(Paragraph(if (attendee.attendeeWillConsumeFood) "Yes" else "No")))
-        }
-        document.add(attendeesTable)
-
-        val meetingStatisticsTitle = Paragraph("Meeting Statistics:").setFont(titleFont)
-        document.add(meetingStatisticsTitle)
-
-        meetingStatistics.forEach { (key, value) ->
-            val item = Paragraph("$key - $value").setFont(normalFont)
-            document.add(item)
-        }
-
-        val generalComments = Paragraph("General Comments: $comments").setFont(titleFont)
-        document.add(generalComments)
-
-        document.close()
-        pdfDocument.close()
-        pdfWriter.close()
-
-        Toast.makeText(context, "PDF generated successfully", Toast.LENGTH_SHORT).show()
     }
 
 }

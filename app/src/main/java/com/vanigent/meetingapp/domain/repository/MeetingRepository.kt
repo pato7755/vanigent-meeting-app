@@ -5,6 +5,8 @@ import com.vanigent.meetingapp.domain.model.Attendee
 import com.vanigent.meetingapp.domain.model.Coordinator
 import com.vanigent.meetingapp.domain.model.Meeting
 import kotlinx.coroutines.flow.Flow
+import retrofit2.Response
+import java.io.File
 
 interface MeetingRepository {
 
@@ -23,5 +25,7 @@ interface MeetingRepository {
     suspend fun login(coordinator: Coordinator): WorkResult<Coordinator>
 
     suspend fun authenticateCoordinator(userPassword: String): Boolean
+
+    suspend fun uploadPDFToServer(file: File): Boolean
 
 }

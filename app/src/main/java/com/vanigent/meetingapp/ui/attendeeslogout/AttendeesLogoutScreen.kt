@@ -1,5 +1,6 @@
 package com.vanigent.meetingapp.ui.attendeeslogout
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,6 +45,8 @@ fun AttendeesLogoutScreen(
     val averageCostOfMeal by viewModel.averageCostOfMeal.collectAsStateWithLifecycle()
     val commentsState by viewModel.commentsState.collectAsStateWithLifecycle()
     val isCostPerAttendeeWithinLimit by viewModel.isCostPerAttendeeWithinLimit.collectAsStateWithLifecycle()
+    val pdfUploadState by viewModel.pdfUploadState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     Row(
         modifier = Modifier
@@ -131,6 +135,15 @@ fun AttendeesLogoutScreen(
 
                 }
             }
+        }
+
+        pdfUploadState.uploadState?.let {
+            if (it) {
+                Toast.makeText(context, "Meeting PDF uploaded successfully", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "Meeting PDF upload unsuccessful", Toast.LENGTH_SHORT).show()
+            }
+
         }
     }
 

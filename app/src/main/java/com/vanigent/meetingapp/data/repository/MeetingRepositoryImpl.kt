@@ -14,10 +14,14 @@ import com.vanigent.meetingapp.domain.model.Meeting
 import com.vanigent.meetingapp.domain.repository.CryptoManager
 import com.vanigent.meetingapp.domain.repository.MeetingRepository
 import com.vanigent.meetingapp.util.Constants.LOGIN_URL
+import com.vanigent.meetingapp.util.Constants.UPLOAD_PDF_URL
 import com.vanigent.meetingapp.util.EncryptedData
+import com.vanigent.meetingapp.util.FileUtilities.toMultipartBodyPart
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import retrofit2.Response
 import timber.log.Timber
+import java.io.File
 import javax.inject.Inject
 
 class MeetingRepositoryImpl @Inject constructor(
@@ -118,7 +122,6 @@ class MeetingRepositoryImpl @Inject constructor(
                         fullName = fullName
                     )
                 )
-//                WorkResult.Success(fullName)
             } else {
                 WorkResult.Error(message = "Empty response body")
             }
@@ -139,6 +142,22 @@ class MeetingRepositoryImpl @Inject constructor(
         iv?.let {
             userDataEntry = cryptoManager.encrypt(userPassword, iv)
             return userDataEntry.password.trim() == storedData.password.trim()
+        }
+        return false
+    }
+
+    override suspend fun uploadPDFToServer(file: File): Boolean {
+        try {
+            val multipartBody = file.toMultipartBodyPart()
+            val response = remoteApi.uploadPdf(UPLOAD_PDF_URL, multipartBody)
+            return if (response.isSuccessful) {
+                true
+            } else {
+                Timber.e("Upload failed with code ${response.code()}")
+                false
+            }
+        } catch (e: Exception) {
+            Timber.e("An error occurred when uploading PDF to server - ${e.localizedMessage}")
         }
         return false
     }
