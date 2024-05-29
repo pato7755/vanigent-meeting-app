@@ -11,6 +11,7 @@ import com.vanigent.meetingapp.domain.usecase.FetchMeetingsUseCase
 import com.vanigent.meetingapp.ui.attendeeslogout.stateholders.CommentState
 import com.vanigent.meetingapp.ui.attendeeslogout.stateholders.MeetingState
 import com.vanigent.meetingapp.ui.attendeeslogout.stateholders.PdfUploadState
+import com.vanigent.meetingapp.ui.common.stateholders.LoadingState
 import com.vanigent.meetingapp.util.Constants.MAXIMUM_ALLOWED_COST_PER_MEAL
 import com.vanigent.meetingapp.util.DateUtilities.getCurrentDate
 import com.vanigent.meetingapp.util.FileUtilities.generatePDF
@@ -62,6 +63,9 @@ class AttendeesLogoutViewModel @Inject constructor(
     private val _pdfUploadState = MutableStateFlow(PdfUploadState())
     val pdfUploadState = _pdfUploadState.asStateFlow()
 
+    private val _loadingState = MutableStateFlow(LoadingState())
+    val loadingState = _loadingState.asStateFlow()
+
     init {
         meetingId.value = savedStateHandle.get<String>("meetingId") ?: ""
         Timber.d("meetingId.value - ${meetingId.value}")
@@ -85,57 +89,62 @@ class AttendeesLogoutViewModel @Inject constructor(
     }
 
     private fun fetchMeeting(meetingId: Long) {
+        _loadingState.update { it.copy(loadingState = true) }
         viewModelScope.launch(Dispatchers.IO) {
             fetchMeetingsUseCase.invoke(meetingId).collectLatest { result ->
                 when (result) {
-                    is WorkResult.Loading -> {
-
-                    }
-
                     is WorkResult.Success -> {
-                        _meetingState.update { state ->
-                            state.copy(
-                                meeting = result.data
-                            )
-                        }
 
-                        _numberOfAttendees.update { (_meetingState.value.meeting?.attendee?.count() ?: 0) + 1 }
-
-                        val coordinatorWillConsumeFood = _meetingState.value.meeting?.coordinatorWillConsumeFood
-                            ?: false
-                        val countOfAttendeesWhoAte = _meetingState.value.meeting?.attendee?.count { it.attendeeWillConsumeFood }
-                            ?: 0
-
-                        _numberOfThoseWhoAte.update {
-                            countOfAttendeesWhoAte + if (coordinatorWillConsumeFood) 1 else 0
-                        }
-
-                        _costOfMeal.update {
-                            _meetingState.value.meeting?.receipt
-                                ?.flatMap { item -> item.receiptItems.entries }
-                                ?.filter { (key, _) -> key == "TOTAL" }
-                                ?.sumOf { (_, value) -> value.removeDollar() } ?: 0.00
-                        }
-
-                        _averageCostOfMeal.update {
-                            _costOfMeal.value.let { total ->
-                                if (total > 0.00) total.div(_numberOfThoseWhoAte.value) else 0.00
+                        withContext(Dispatchers.Main) {
+                            _loadingState.update { it.copy(loadingState = false) }
+                            _meetingState.update { state ->
+                                state.copy(
+                                    meeting = result.data
+                                )
                             }
-                        }
 
-//                        withContext(Dispatchers.Main) {
+                            _numberOfAttendees.update {
+                                (_meetingState.value.meeting?.attendee?.count() ?: 0) + 1
+                            }
+
+                            val coordinatorWillConsumeFood =
+                                _meetingState.value.meeting?.coordinatorWillConsumeFood
+                                    ?: false
+
+                            val countOfAttendeesWhoAte =
+                                _meetingState.value.meeting?.attendee?.count { it.attendeeWillConsumeFood }
+                                    ?: 0
+
+                            _numberOfThoseWhoAte.update {
+                                countOfAttendeesWhoAte + if (coordinatorWillConsumeFood) 1 else 0
+                            }
+
+                            _costOfMeal.update {
+                                _meetingState.value.meeting?.receipt
+                                    ?.flatMap { item -> item.receiptItems.entries }
+                                    ?.filter { (key, _) -> key == "TOTAL" }
+                                    ?.sumOf { (_, value) -> value.removeDollar() } ?: 0.00
+                            }
+
+                            _averageCostOfMeal.update {
+                                _costOfMeal.value.let { total ->
+                                    if (total > 0.00) total.div(_numberOfThoseWhoAte.value) else 0.00
+                                }
+                            }
+
                             validateCostPerAttendee(_averageCostOfMeal.value)
-//                        }
+                        }
 
                     }
 
                     is WorkResult.Error -> {
-
+                        _loadingState.update { it.copy(loadingState = false) }
                     }
                 }
 
             }
         }
+
     }
 
     private fun fetchCoordinatorName() {
@@ -157,6 +166,7 @@ class AttendeesLogoutViewModel @Inject constructor(
     }
 
     fun onContinuePressed() {
+        _loadingState.update { it.copy(loadingState = true) }
         val filename = "Meeting " + meetingId.value + "(${getCurrentDate()}).pdf"
         val meetingStatistics = mapOf(
             "Number of attendees" to _numberOfAttendees.value.toString(),
@@ -177,12 +187,15 @@ class AttendeesLogoutViewModel @Inject constructor(
 
                 generatedPdf?.let { pdf ->
                     val result = meetingRepository.uploadPDFToServer(pdf)
-                    _pdfUploadState.update { state ->
-                        state.copy(uploadState = result)
+                    withContext(Dispatchers.Main) {
+                        _loadingState.update { loading -> loading.copy(loadingState = false) }
+                        _pdfUploadState.update { state ->
+                            state.copy(uploadState = result)
+                        }
                     }
                 }
             }
-
         }
+
     }
 }

@@ -53,18 +53,27 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    private fun toggleLoadingState() {
+        _screenState.update { state ->
+            state.copy(loadingState = !state.loadingState)
+        }
+    }
+
     fun login() {
         val coordinator = Coordinator(
             username = _usernameState.value.username,
             password = _passwordState.value.password
         )
+        _screenState.update { it.copy(loadingState = true) }
+
         viewModelScope.launch(Dispatchers.IO) {
             when (val result = loginUseCase.invoke(coordinator)) {
                 is WorkResult.Success -> {
                     withContext(Dispatchers.Main) {
                         _screenState.update { state ->
                             state.copy(
-                                loginState = true
+                                loginResultState = true,
+                                loadingState = false
                             )
                         }
                     }
@@ -74,14 +83,16 @@ class LoginViewModel @Inject constructor(
 
                     _screenState.update { state ->
                         state.copy(
-                            loginState = false,
+                            loginResultState = false,
                             snackBarVisibility = true,
+                            loadingState = false,
                             errorMessage = result.message ?: "An error occurred"
                         )
                     }
                 }
 
                 else -> {
+                    _screenState.update { it.copy(loadingState = false) }
                 }
             }
         }

@@ -49,6 +49,7 @@ import com.vanigent.meetingapp.ui.attendeeslogin.components.DrawingCanvas
 import com.vanigent.meetingapp.ui.attendeeslogin.components.ExposedDropdownMenu
 import com.vanigent.meetingapp.ui.attendeeslogin.components.Line
 import com.vanigent.meetingapp.ui.attendeeslogin.components.PasswordDialog
+import com.vanigent.meetingapp.ui.common.ProgressIndicator
 import com.vanigent.meetingapp.ui.common.SectionHeader
 import com.vanigent.meetingapp.ui.coordinatorlogin.components.ActionButton
 import com.vanigent.meetingapp.ui.coordinatorlogin.components.RadioButtons
@@ -76,6 +77,7 @@ fun AttendeesLoginScreen(
     val context = LocalContext.current
     val selectedRadioButtonOption = viewModel.radioButtonSelection.collectAsStateWithLifecycle()
     val passwordState by viewModel.coordinatorPassword.collectAsStateWithLifecycle()
+    val loadingState by viewModel.loadingState.collectAsStateWithLifecycle()
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
@@ -186,7 +188,6 @@ fun AttendeesLoginScreen(
                                     Timber.d("selectedOption - $it")
                                     viewModel.setRadioButtonSelection(it)
                                 }
-//                                    onRadioButtonSelected = viewModel::radioButtonSelection
 
                                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -273,6 +274,10 @@ fun AttendeesLoginScreen(
                     signatureBitmap = signatureBitmap.bitmap,
                     onSubmitButtonPressed = { viewModel.updateSignature(it) }
                 )
+            }
+
+            if (loadingState.loadingState) {
+                ProgressIndicator()
             }
 
         }

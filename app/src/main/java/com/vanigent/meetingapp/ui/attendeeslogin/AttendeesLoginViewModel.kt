@@ -19,6 +19,7 @@ import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.LastNameState
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.PIDState
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.SignatureState
 import com.vanigent.meetingapp.ui.attendeeslogin.stateholders.SnackbarState
+import com.vanigent.meetingapp.ui.common.stateholders.LoadingState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -73,6 +74,9 @@ class AttendeesLoginViewModel @Inject constructor(
 
     private val _errorState = MutableStateFlow(ErrorState())
     val errorState = _errorState.asStateFlow()
+
+    private val _loadingState = MutableStateFlow(LoadingState())
+    val loadingState = _loadingState.asStateFlow()
 
     init {
         meetingId.value = savedStateHandle.get<String>("meetingId") ?: ""
@@ -143,8 +147,6 @@ class AttendeesLoginViewModel @Inject constructor(
         val isFirstNameValid = isNameValid(_firstName.value.firstName)
 
         val isLastNameValid = isNameValid(_lastName.value.lastName)
-
-//        val isPidValid = isPidValid(_pid.value.pId)
 
         val isProfessionalDesignationValid = isProfessionalDesignationValid()
 
@@ -228,10 +230,6 @@ class AttendeesLoginViewModel @Inject constructor(
         _signatureLines.addAll(newLines)
     }
 
-//    fun resetRadioButtonSelection() {
-//        _radioButtonSelection.value = null
-//    }
-
     fun setRadioButtonSelection(selection: Boolean?) {
         _radioButtonSelection.value = selection
     }
@@ -253,6 +251,8 @@ class AttendeesLoginViewModel @Inject constructor(
     }
 
     private fun saveAttendeeDetails() {
+        _loadingState.update { it.copy(loadingState = true) }
+
         val firstName = _firstName.value.firstName.trim()
         val lastName = _lastName.value.lastName.trim()
         val pId = _pid.value.pId.trim()
@@ -278,9 +278,11 @@ class AttendeesLoginViewModel @Inject constructor(
                 )
             )
         }
+        _loadingState.update { it.copy(loadingState = false) }
     }
 
     fun getMeetingId(onMeetingIdReceived: (String) -> Unit) {
+        _loadingState.update { it.copy(loadingState = true) }
         viewModelScope.launch(Dispatchers.IO) {
             val result = meetingRepository.authenticateCoordinator(_coordinatorPassword.value.password)
             withContext(Dispatchers.Main) {
@@ -292,5 +294,6 @@ class AttendeesLoginViewModel @Inject constructor(
                 onMeetingIdReceived(meetingId.value)
             }
         }
+        _loadingState.update { it.copy(loadingState = false) }
     }
 }

@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vanigent.meetingapp.R
+import com.vanigent.meetingapp.ui.common.ProgressIndicator
 import com.vanigent.meetingapp.util.Constants
 import kotlinx.coroutines.launch
 
@@ -109,6 +110,10 @@ fun LoginScreen(
             }
         }
         viewModel.resetSnackBarVisibility()
+    }
+
+    if (loginScreenState.loadingState) {
+        ProgressIndicator()
     }
 }
 
@@ -215,8 +220,8 @@ fun LoginFormSection(
             ) {
                 Text(text = "SIGN IN")
             }
-            LaunchedEffect(screenState.value.loginState) {
-                if (screenState.value.loginState) {
+            LaunchedEffect(screenState.value.loginResultState) {
+                if (screenState.value.loginResultState) {
                     navigateOnLoginSuccess()
                 }
             }

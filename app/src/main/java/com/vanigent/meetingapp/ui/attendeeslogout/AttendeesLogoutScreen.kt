@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vanigent.meetingapp.R
 import com.vanigent.meetingapp.ui.common.CustomCard
 import com.vanigent.meetingapp.ui.common.LazyTablePinnedScreen
+import com.vanigent.meetingapp.ui.common.ProgressIndicator
 import com.vanigent.meetingapp.ui.common.SectionHeader
 import com.vanigent.meetingapp.ui.coordinatorlogin.components.ActionButton
 import com.vanigent.meetingapp.ui.coordinatorlogin.components.LabeledTextRow
@@ -46,6 +47,7 @@ fun AttendeesLogoutScreen(
     val commentsState by viewModel.commentsState.collectAsStateWithLifecycle()
     val isCostPerAttendeeWithinLimit by viewModel.isCostPerAttendeeWithinLimit.collectAsStateWithLifecycle()
     val pdfUploadState by viewModel.pdfUploadState.collectAsStateWithLifecycle()
+    val loadingState by viewModel.loadingState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     Row(
@@ -143,7 +145,9 @@ fun AttendeesLogoutScreen(
             } else {
                 Toast.makeText(context, "Meeting PDF upload unsuccessful", Toast.LENGTH_SHORT).show()
             }
-
+        }
+        if (loadingState.loadingState) {
+            ProgressIndicator()
         }
     }
 
