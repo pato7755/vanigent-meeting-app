@@ -8,6 +8,7 @@ import com.vanigent.meetingapp.domain.repository.MeetingRepository
 import com.vanigent.meetingapp.domain.usecase.LoginUseCase
 import com.vanigent.meetingapp.ui.signin.stateholders.LoginScreenState
 import com.vanigent.meetingapp.ui.signin.stateholders.PasswordState
+import com.vanigent.meetingapp.ui.signin.stateholders.PermissionState
 import com.vanigent.meetingapp.ui.signin.stateholders.UsernameState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -33,6 +34,12 @@ class LoginViewModel @Inject constructor(
     private val _screenState = MutableStateFlow(LoginScreenState())
     val screenState = _screenState.asStateFlow()
 
+    private val _permissionsResult = MutableStateFlow(PermissionState())
+    val permissionsResult = _permissionsResult.asStateFlow()
+
+    private val _isLocationServiceEnabled = MutableStateFlow(false)
+
+
     init {
         repository.dbSetup()
     }
@@ -53,9 +60,27 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private fun toggleLoadingState() {
-        _screenState.update { state ->
-            state.copy(loadingState = !state.loadingState)
+    fun setCameraPermissionResult(granted: Boolean) {
+        _permissionsResult.update { state ->
+            state.copy(
+                cameraGranted = granted
+            )
+        }
+    }
+
+    fun setWriteStoragePermissionResult(granted: Boolean) {
+        _permissionsResult.update { state ->
+            state.copy(
+                writeStorageGranted = granted
+            )
+        }
+    }
+
+    fun setReadStoragePermissionResult(granted: Boolean) {
+        _permissionsResult.update { state ->
+            state.copy(
+                readStorageGranted = granted
+            )
         }
     }
 
