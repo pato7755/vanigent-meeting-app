@@ -14,10 +14,15 @@ object Utilities {
         }
 
     fun String.splitName(): Pair<String, String> {
-        val parts = this.split(" ")
-        val firstName = parts.first()
+        val parts = this.trim().split(" ")
+        if (parts.size == 1) {
+            // If there's only one part, assume it's a single name (edge case)
+            return Pair(parts.first(), "")
+        }
+        val firstName = parts.dropLast(1).joinToString(" ")
         val lastName = parts.last()
         return Pair(firstName, lastName)
     }
+
 
 }
