@@ -192,7 +192,7 @@ class AttendeesLoginViewModel @Inject constructor(
                 toggleSnackbarVisibility()
             }
 
-            isFormBlank() -> {
+            isFormBlank() && !isProfessionalDesignationValid() -> {
                 updateIsFormBlank(true)
                 toggleDialogVisibility()
             }

@@ -65,10 +65,11 @@ fun AttendeesLogoutScreen(
                 meetingState.meeting?.let {
                     LazyTablePinnedScreen(
                         onBackClick = {},
-                        meeting = it
+                        meeting = it,
+                        coordinatorFirstName = meetingState.coordinatorFirstName,
+                        coordinatorLastName = meetingState.coordinatorLastName
                     )
                 }
-
             }
 
             ActionButton(

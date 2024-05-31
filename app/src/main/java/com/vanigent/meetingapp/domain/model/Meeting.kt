@@ -5,9 +5,7 @@ data class Meeting(
     val address: Address,
     val coordinatorWillConsumeFood: Boolean,
     val receipt: List<Receipt>,
-    val attendee: List<Attendee>,
-    var coordinatorFirstName: String = "",
-    var coordinatorLastName: String = ""
+    val attendee: List<Attendee>
 )
 
 data class Attendee(

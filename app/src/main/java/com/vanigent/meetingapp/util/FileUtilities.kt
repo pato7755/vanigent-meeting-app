@@ -14,6 +14,7 @@ import com.itextpdf.layout.element.Paragraph
 import com.itextpdf.layout.element.Table
 import com.vanigent.meetingapp.domain.model.Meeting
 import com.vanigent.meetingapp.util.DateUtilities.getCurrentDate
+import com.vanigent.meetingapp.util.Utilities.splitName
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -62,7 +63,7 @@ object FileUtilities {
         filename: String,
         meeting: Meeting,
         comments: String,
-        meetingStatistics: Map<String, String>
+        meetingStatistics: Map<String, String>,
     ): File? {
 
         try {
@@ -94,12 +95,6 @@ object FileUtilities {
                 Paragraph("Physician name: ${meeting.address.physicianName}").setFont(titleFont)
             document.add(physicianName)
 
-            val coordinatorFood = Paragraph(
-                "Did Coordinator Consume Food - " +
-                        if (meeting.coordinatorWillConsumeFood) "Yes" else "No"
-            ).setFont(normalFont)
-            document.add(coordinatorFood)
-
             val attendeesTitle = Paragraph("Attendees:").setFont(titleFont)
             document.add(attendeesTitle)
 
@@ -118,6 +113,21 @@ object FileUtilities {
             attendeesTableHeaders.forEach {
                 attendeesTable.addHeaderCell(it)
             }
+
+
+
+            meetingStatistics["Coordinator name"].let {
+
+                val (firstName, lastName) = it?.splitName() ?: Pair("", "")
+
+                attendeesTable.addCell(Cell().add(Paragraph("#")))
+                attendeesTable.addCell(Cell().add(Paragraph(firstName)))
+                attendeesTable.addCell(Cell().add(Paragraph(lastName)))
+                attendeesTable.addCell(Cell().add(Paragraph("")))
+                attendeesTable.addCell(Cell().add(Paragraph("")))
+                attendeesTable.addCell(Cell().add(Paragraph(if (meeting.coordinatorWillConsumeFood) "Yes" else "No")))
+            }
+
             meeting.attendee.forEachIndexed { index, attendee ->
                 attendeesTable.addCell(Cell().add(Paragraph("${index + 1}")))
                 attendeesTable.addCell(Cell().add(Paragraph(attendee.attendeeFirstName)))

@@ -75,10 +75,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
 
-//                    val permissionsGranted = checkPermissions()
-//                    loginViewModel.setPermissionsResult(permissionsGranted)
-
-                        requestPermissions()
+                    requestPermissions()
 
                     MainScreen()
                 }
@@ -86,25 +83,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-//    private fun checkPermissions(): Boolean {
-//        val cameraPermission = ContextCompat.checkSelfPermission(
-//            this,
-//            Manifest.permission.CAMERA
-//        )
-//        val writeStoragePermission = ContextCompat.checkSelfPermission(
-//            this,
-//            Manifest.permission.WRITE_EXTERNAL_STORAGE
-//        )
-//        val readStoragePermission = ContextCompat.checkSelfPermission(
-//            this,
-//            Manifest.permission.READ_EXTERNAL_STORAGE
-//        )
-//
-//        return cameraPermission == PackageManager.PERMISSION_GRANTED &&
-//                writeStoragePermission == PackageManager.PERMISSION_GRANTED &&
-//                readStoragePermission == PackageManager.PERMISSION_GRANTED
-//    }
 }
 
 @Preview(showBackground = true)

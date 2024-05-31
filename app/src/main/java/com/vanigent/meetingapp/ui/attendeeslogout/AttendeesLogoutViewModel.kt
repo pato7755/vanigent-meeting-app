@@ -99,7 +99,7 @@ class AttendeesLogoutViewModel @Inject constructor(
                             _loadingState.update { it.copy(loadingState = false) }
                             _meetingState.update { state ->
                                 state.copy(
-                                    meeting = result.data
+                                    meeting = result.data,
                                 )
                             }
 
@@ -155,11 +155,10 @@ class AttendeesLogoutViewModel @Inject constructor(
                 val (firstName, lastName) = coordinatorDetails.fullName?.splitName()
                     ?: Pair("", "")
                 _meetingState.update { state ->
-                    val updatedMeeting = state.meeting?.copy(
+                    state.copy(
                         coordinatorFirstName = firstName,
                         coordinatorLastName = lastName
                     )
-                    state.copy(meeting = updatedMeeting)
                 }
             }
         }
@@ -169,6 +168,8 @@ class AttendeesLogoutViewModel @Inject constructor(
         _loadingState.update { it.copy(loadingState = true) }
         val filename = "Meeting " + meetingId.value + "(${getCurrentDate()}).pdf"
         val meetingStatistics = mapOf(
+            "Coordinator name" to
+                    _meetingState.value.coordinatorFirstName + " " + _meetingState.value.coordinatorLastName,
             "Number of attendees" to _numberOfAttendees.value.toString(),
             "Number of those who consumed food" to _numberOfThoseWhoAte.value.toString(),
             "Total cost of meal" to "$".plus(_costOfMeal.value.toString()),

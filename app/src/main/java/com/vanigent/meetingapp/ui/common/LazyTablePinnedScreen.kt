@@ -36,7 +36,9 @@ import eu.wewox.lazytable.lazyTablePinConfiguration
 @Composable
 fun LazyTablePinnedScreen(
     onBackClick: () -> Unit,
-    meeting: Meeting
+    meeting: Meeting,
+    coordinatorFirstName: String,
+    coordinatorLastName: String
 ) {
 
     val columns = 3
@@ -68,8 +70,8 @@ fun LazyTablePinnedScreen(
                     ) {
                         if (it / columns == 0) {
                             CoordinatorCell(
-                                coordinatorFirstName = meeting.coordinatorFirstName,
-                                coordinatorLastName = meeting.coordinatorLastName,
+                                coordinatorFirstName = coordinatorFirstName,
+                                coordinatorLastName = coordinatorLastName,
                                 column = it % columns,
                                 meeting.coordinatorWillConsumeFood
                             )
@@ -226,9 +228,7 @@ fun meetings(): List<Meeting> {
                     attendeeProfessionalDesignation = "PA",
                     attendeeSignature = "".toByteArray()
                 )
-            ),
-            coordinatorFirstName = "Pierre-Alexandre",
-            coordinatorLastName = "Brault"
+            )
         ),
         Meeting(
             id = 2,
@@ -290,6 +290,8 @@ fun meetings(): List<Meeting> {
 fun MediumSizedTablet() {
     LazyTablePinnedScreen(
         meeting = meetings()[0],
+        coordinatorFirstName = "Michael",
+        coordinatorLastName = "Smith",
         onBackClick = {}
     )
 }
@@ -303,6 +305,8 @@ fun MediumSizedTablet() {
 fun ExpandedSizedTablet() {
     LazyTablePinnedScreen(
         meeting = meetings()[0],
+        coordinatorFirstName = "Michael",
+        coordinatorLastName = "Smith",
         onBackClick = {}
     )
 }
