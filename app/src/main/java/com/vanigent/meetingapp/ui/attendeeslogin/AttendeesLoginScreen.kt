@@ -66,7 +66,7 @@ fun AttendeesLoginScreen(
     val firstNameState by viewModel.firstNameState.collectAsStateWithLifecycle()
     val lastNameState by viewModel.lastNameState.collectAsStateWithLifecycle()
     val pidState by viewModel.pidState.collectAsStateWithLifecycle()
-    val selectedDropdownOption by viewModel.selectedDropdownOption.collectAsStateWithLifecycle()
+    val professionalDesignationState by viewModel.professionalDesignation.collectAsStateWithLifecycle()
     val signatureLines = viewModel.signatureLines
     val signatureBitmap by viewModel.signatureBitmap.collectAsStateWithLifecycle()
     val dialogState by viewModel.dialogVisibility.collectAsStateWithLifecycle()
@@ -78,6 +78,8 @@ fun AttendeesLoginScreen(
     val selectedRadioButtonOption = viewModel.radioButtonSelection.collectAsStateWithLifecycle()
     val passwordState by viewModel.coordinatorPassword.collectAsStateWithLifecycle()
     val loadingState by viewModel.loadingState.collectAsStateWithLifecycle()
+    val errorState by viewModel.errorState.collectAsStateWithLifecycle()
+    val meetingId by viewModel.meetingId.collectAsStateWithLifecycle()
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
@@ -122,7 +124,7 @@ fun AttendeesLoginScreen(
                                 Spacer(modifier = Modifier.height(16.dp))
 
                                 ExposedDropdownMenu(
-                                    selectedOption = selectedDropdownOption,
+                                    selectedOption = professionalDesignationState.professionalDesignation,
                                     optionsProvider = viewModel::fetchProfessionalDesignations,
                                     onOptionSelected = viewModel::updateDropdownSelectedOption
                                 )
@@ -202,14 +204,21 @@ fun AttendeesLoginScreen(
                                     viewModel.toggleDialogVisibility()
                                 },
                                 onConfirmation = {
-                                    viewModel.getMeetingId { meetingId ->
-                                        if (passwordState.isValid == true) {
-                                            viewModel.toggleDialogVisibility()
-                                            onContinueButtonPressed(meetingId)
-                                        } else {
-                                            Toast.makeText(context, "Wrong password", Toast.LENGTH_SHORT).show()
-                                        }
-                                    }
+//                                    viewModel.getMeetingId()
+//                                    { meetingId ->
+//                                        if (passwordState.isValid == true) {
+//                                            viewModel.toggleDialogVisibility()
+//                                            onContinueButtonPressed(meetingId)
+//                                        } else {
+//                                            Toast.makeText(context, "Wrong password", Toast.LENGTH_SHORT).show()
+//                                        }
+//                                    }
+
+                                    viewModel.validatePassword()
+
+
+
+
                                 },
                                 passwordText = passwordState.password,
                                 modifier = Modifier.background(
@@ -218,6 +227,20 @@ fun AttendeesLoginScreen(
                                 onPasswordTextChanged = viewModel::onPasswordTextChanged
 
                             )
+                        }
+
+                        LaunchedEffect(passwordState.isValid) {
+                            when (passwordState.isValid) {
+                                true -> {
+                                    viewModel.toggleDialogVisibility()
+                                    onContinueButtonPressed(meetingId)
+                                }
+                                false -> {
+                                    Toast.makeText(context, "Wrong password", Toast.LENGTH_SHORT)
+                                        .show()
+                                }
+                                else -> {}
+                            }
                         }
 
                         val errorTextSignature = stringResource(id = R.string.please_add_signature)
@@ -229,13 +252,17 @@ fun AttendeesLoginScreen(
                                 .fillMaxWidth()
                                 .align(Alignment.CenterHorizontally),
                             onClick = {
-                                viewModel.performFieldValidations { error ->
+                                viewModel.performFieldValidations { _ ->
                                     when {
-                                        error.isProfessionalDesignationValid == false -> {
-                                            Toast.makeText(context, errorTextDesignation, Toast.LENGTH_SHORT).show()
+//                                        professionalDesignationState.isValid != null -> {
+                                        /*errorState.isProfessionalDesignationValid != null &&*/ errorState.isProfessionalDesignationValid == false-> {
+                                            if (!isFormBlank)
+                                                Toast.makeText(context, errorTextDesignation, Toast.LENGTH_SHORT).show()
                                         }
-                                        error.isSignatureValid == false -> {
-                                            Toast.makeText(context, errorTextSignature, Toast.LENGTH_SHORT).show()
+                                        /*errorState.isSignatureValid != null &&*/ errorState.isSignatureValid == false-> {
+//                                        signatureBitmap.isValid == false -> {
+                                            if (!isFormBlank)
+                                                Toast.makeText(context, errorTextSignature, Toast.LENGTH_SHORT).show()
                                         }
                                     }
                                 }
