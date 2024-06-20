@@ -1,8 +1,9 @@
 package com.vanigent.meetingapp.util
 
 import com.vanigent.meetingapp.util.Utilities.splitName
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 class UtilitiesTest {
 
@@ -10,8 +11,8 @@ class UtilitiesTest {
     fun `splitName should return first name and last name when full name is given`() {
         val name = "John Doe"
         val (firstName, lastName) = name.splitName()
-        assertEquals("John", firstName)
-        assertEquals("Doe", lastName)
+        Assertions.assertEquals("John", firstName)
+        Assertions.assertEquals("Doe", lastName)
     }
 
     @Test
