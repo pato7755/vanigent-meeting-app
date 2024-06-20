@@ -55,6 +55,7 @@ import com.vanigent.meetingapp.ui.coordinatorlogin.components.ActionButton
 import com.vanigent.meetingapp.ui.coordinatorlogin.components.RadioButtons
 import com.vanigent.meetingapp.util.Constants.SEVENTY_PERCENT
 import com.vanigent.meetingapp.util.Constants.THIRTY_PERCENT
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -203,23 +204,7 @@ fun AttendeesLoginScreen(
                                 onDismiss = {
                                     viewModel.toggleDialogVisibility()
                                 },
-                                onConfirmation = {
-//                                    viewModel.getMeetingId()
-//                                    { meetingId ->
-//                                        if (passwordState.isValid == true) {
-//                                            viewModel.toggleDialogVisibility()
-//                                            onContinueButtonPressed(meetingId)
-//                                        } else {
-//                                            Toast.makeText(context, "Wrong password", Toast.LENGTH_SHORT).show()
-//                                        }
-//                                    }
-
-                                    viewModel.validatePassword()
-
-
-
-
-                                },
+                                onConfirmation = { viewModel.validatePassword() },
                                 passwordText = passwordState.password,
                                 modifier = Modifier.background(
                                     color = Color.White
@@ -233,11 +218,11 @@ fun AttendeesLoginScreen(
                             when (passwordState.isValid) {
                                 true -> {
                                     viewModel.toggleDialogVisibility()
+                                    delay(200)
                                     onContinueButtonPressed(meetingId)
                                 }
                                 false -> {
-                                    Toast.makeText(context, "Wrong password", Toast.LENGTH_SHORT)
-                                        .show()
+                                    Toast.makeText(context, "Wrong password", Toast.LENGTH_SHORT).show()
                                 }
                                 else -> {}
                             }

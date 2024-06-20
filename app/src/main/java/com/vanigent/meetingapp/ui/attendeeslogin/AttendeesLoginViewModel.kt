@@ -352,7 +352,7 @@ class AttendeesLoginViewModel @Inject constructor(
         _loadingState.update { it.copy(loadingState = false) }
     }
 
-    fun validatePassword(/*onMeetingIdReceived: (String) -> Unit*/) {
+    fun validatePassword() {
         _loadingState.update { it.copy(loadingState = true) }
         viewModelScope.launch(Dispatchers.IO) {
             val result = meetingRepository.authenticateCoordinator(_coordinatorPassword.value.password)
@@ -362,7 +362,6 @@ class AttendeesLoginViewModel @Inject constructor(
                         isValid = result
                     )
                 }
-//                onMeetingIdReceived(meetingId.value)
             }
         }
         _loadingState.update { it.copy(loadingState = false) }
