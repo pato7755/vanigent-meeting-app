@@ -114,8 +114,6 @@ object FileUtilities {
                 attendeesTable.addHeaderCell(it)
             }
 
-
-
             meetingStatistics["Coordinator name"].let {
 
                 val (firstName, lastName) = it?.splitName() ?: Pair("", "")

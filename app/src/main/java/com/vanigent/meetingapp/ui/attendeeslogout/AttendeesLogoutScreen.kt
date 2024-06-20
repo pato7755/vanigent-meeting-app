@@ -1,7 +1,6 @@
 package com.vanigent.meetingapp.ui.attendeeslogout
 
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -36,6 +35,7 @@ import com.vanigent.meetingapp.ui.coordinatorlogin.components.LabeledTextRow
 
 @Composable
 fun AttendeesLogoutScreen(
+    onUploadSuccess: () -> Unit,
     viewModel: AttendeesLogoutViewModel = hiltViewModel()
 ) {
 
@@ -142,7 +142,7 @@ fun AttendeesLogoutScreen(
 
         pdfUploadState.uploadState?.let {
             if (it) {
-                Toast.makeText(context, "Meeting PDF uploaded successfully", Toast.LENGTH_SHORT).show()
+                onUploadSuccess()
             } else {
                 Toast.makeText(context, "Meeting PDF upload unsuccessful", Toast.LENGTH_SHORT).show()
             }
@@ -212,7 +212,7 @@ fun SummarySection(
 )
 fun MediumSizedTablet() {
     AttendeesLogoutScreen(
-//        onContinueButtonPressed = {}
+        onUploadSuccess = {}
     )
 }
 
@@ -224,7 +224,7 @@ fun MediumSizedTablet() {
 )
 fun ExpandedSizedTablet() {
     AttendeesLogoutScreen(
-//        onContinueButtonPressed = {}
+        onUploadSuccess = {}
     )
 }
 

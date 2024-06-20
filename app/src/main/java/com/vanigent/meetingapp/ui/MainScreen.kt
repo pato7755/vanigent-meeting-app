@@ -8,6 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import com.vanigent.meetingapp.ui.attendeeslogin.AttendeesLoginScreen
 import com.vanigent.meetingapp.ui.attendeeslogout.AttendeesLogoutScreen
 import com.vanigent.meetingapp.ui.coordinatorlogin.CoordinatorLoginScreen
+import com.vanigent.meetingapp.ui.endscreen.EndScreen
 import com.vanigent.meetingapp.ui.signin.LoginScreen
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -41,7 +42,15 @@ fun MainScreen() {
         }
 
         composable(route = "attendees_logout/{meetingId}") {
-            AttendeesLogoutScreen()
+            AttendeesLogoutScreen(
+                onUploadSuccess = {
+                    navController.navigate(route = "end_screen")
+                }
+            )
+        }
+
+        composable(route = "end_screen") {
+            EndScreen()
         }
 
     }
