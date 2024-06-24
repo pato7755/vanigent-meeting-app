@@ -1,5 +1,6 @@
 package com.vanigent.meetingapp.ui.attendeeslogin.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.DropdownMenuItem
@@ -15,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.vanigent.meetingapp.R
@@ -30,8 +32,7 @@ fun ExposedDropdownMenu(
     var expanded by remember { mutableStateOf(false) }
 
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxWidth().background(Color.White)
     ) {
         ExposedDropdownMenuBox(
             expanded = expanded,
@@ -49,7 +50,8 @@ fun ExposedDropdownMenu(
 
             ExposedDropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.background(Color.White)
             ) {
                 optionsProvider().forEach { item ->
                     DropdownMenuItem(

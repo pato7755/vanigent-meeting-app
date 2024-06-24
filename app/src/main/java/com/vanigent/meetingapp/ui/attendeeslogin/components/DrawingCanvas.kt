@@ -3,6 +3,7 @@ package com.vanigent.meetingapp.ui.attendeeslogin.components
 import android.graphics.Bitmap
 import android.graphics.Paint
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -34,6 +35,7 @@ fun DrawingCanvas(
     Canvas(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.White)
             .pointerInput(true) {
                 detectDragGestures { change, dragAmount ->
                     change.consume()

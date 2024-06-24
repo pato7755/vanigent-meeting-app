@@ -3,8 +3,10 @@
 package com.vanigent.meetingapp.ui.coordinatorlogin
 
 import android.graphics.Bitmap
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,7 +35,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -76,6 +80,7 @@ fun CoordinatorLoginScreen(
     Row(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.White)
             .padding(16.dp)
     ) {
         Column(
@@ -86,13 +91,13 @@ fun CoordinatorLoginScreen(
             SearchBar(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(Color.White)
                     .padding(horizontal = 8.dp)
             )
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
-
                 item {
                     Column(
                         modifier = Modifier
@@ -261,7 +266,15 @@ fun SearchBar(
         },
         leadingIcon = {
             Icon(imageVector = Icons.Default.Search, contentDescription = null)
-        }
+        },
+        colors = SearchBarDefaults.colors(
+            containerColor = Color.White,
+            dividerColor = Color.DarkGray,
+            inputFieldColors = TextFieldDefaults.colors(
+                focusedTextColor = Color.Gray, // Set the text color to gray
+                cursorColor = Color.Gray, // Optionally set the cursor color to gray
+                )
+            )
     ) {
         historyItems.forEach { historyItem ->
             Row(modifier = Modifier.padding(all = 16.dp)) {
@@ -334,21 +347,24 @@ fun AddressDetailsBox(
                     value = it.physicianName,
                     labelModifier = Modifier.weight(THIRTY_PERCENT),
                     valueModifier = Modifier.weight(1f),
-                    labelColor = Color.Gray
+                    labelColor = Color.Gray,
+                    valueColor = colorResource(R.color.vanigent_light_green)
                 )
                 LabeledTextRow(
                     label = stringResource(R.string.address),
                     value = it.lineOne,
                     labelModifier = Modifier.weight(THIRTY_PERCENT),
                     valueModifier = Modifier.weight(1f),
-                    labelColor = Color.Gray
+                    labelColor = Color.Gray,
+                    valueColor = colorResource(R.color.vanigent_light_green)
                 )
                 LabeledTextRow(
                     label = stringResource(R.string.city),
                     value = it.city,
                     labelModifier = Modifier.weight(THIRTY_PERCENT),
                     valueModifier = Modifier.weight(1f),
-                    labelColor = Color.Gray
+                    labelColor = Color.Gray,
+                    valueColor = colorResource(R.color.vanigent_light_green)
                 )
             }
         }
@@ -358,7 +374,6 @@ fun AddressDetailsBox(
 
 @Composable
 fun RadioButtonCard(
-//    onRadioButtonSelected: (Boolean) -> Unit,
     selectedOption: Boolean?,
     clearSelection: Boolean,
     viewModel: CoordinatorLoginViewModel = hiltViewModel()
@@ -406,6 +421,7 @@ fun ReceiptImageSection(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .background(Color.White)
             .wrapContentHeight()
             .clickable {
                 showCameraPreview = !showCameraPreview

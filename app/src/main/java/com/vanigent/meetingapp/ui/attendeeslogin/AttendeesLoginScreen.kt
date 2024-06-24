@@ -37,11 +37,13 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vanigent.meetingapp.R
@@ -89,6 +91,7 @@ fun AttendeesLoginScreen(
         Row(
             modifier = Modifier
                 .fillMaxSize()
+                .background(Color.White)
                 .padding(16.dp)
         ) {
 
@@ -97,14 +100,10 @@ fun AttendeesLoginScreen(
                     .weight(SEVENTY_PERCENT)
                     .padding(paddingValues)
             ) {
-
                 item {
-
                     Column(
-                        modifier = Modifier
-                            .fillMaxHeight()
+                        modifier = Modifier.fillMaxHeight()
                     ) {
-
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -137,6 +136,10 @@ fun AttendeesLoginScreen(
                                     label = { Text(stringResource(id = R.string.first_name)) },
                                     value = firstNameState.firstName,
                                     singleLine = true,
+                                    textStyle = TextStyle(
+                                        color = Color.Gray,
+                                        fontSize = 16.sp
+                                    ),
                                     keyboardOptions = KeyboardOptions(
                                         keyboardType = KeyboardType.Text,
                                         capitalization = KeyboardCapitalization.Words,
@@ -154,6 +157,10 @@ fun AttendeesLoginScreen(
                                     label = { Text(stringResource(id = R.string.last_name)) },
                                     value = lastNameState.lastName,
                                     singleLine = true,
+                                    textStyle = TextStyle(
+                                        color = Color.Gray,
+                                        fontSize = 16.sp
+                                    ),
                                     keyboardOptions = KeyboardOptions(
                                         keyboardType = KeyboardType.Text,
                                         capitalization = KeyboardCapitalization.Words,
@@ -171,6 +178,10 @@ fun AttendeesLoginScreen(
                                     label = { Text(stringResource(id = R.string.pid)) },
                                     value = pidState.pId,
                                     singleLine = true,
+                                    textStyle = TextStyle(
+                                        color = Color.Gray,
+                                        fontSize = 16.sp
+                                    ),
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                     onValueChange = {
                                         viewModel.onPidTextChanged(it)
@@ -306,6 +317,7 @@ fun SignatureSection(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .background(Color.White)
             .wrapContentHeight(),
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
     ) {

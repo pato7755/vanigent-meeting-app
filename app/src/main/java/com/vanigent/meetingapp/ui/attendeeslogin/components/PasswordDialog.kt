@@ -33,11 +33,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.vanigent.meetingapp.R
 import com.vanigent.meetingapp.ui.common.SectionHeader
@@ -74,8 +76,8 @@ fun PasswordDialog(
             ) {
                 Text(
                     text = "This is a security check to keep your data safe.",
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.Gray
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -85,7 +87,7 @@ fun PasswordDialog(
                         Icon(
                             if (isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                             contentDescription = "",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = Color.Gray
                         )
                     }
                 }
@@ -95,6 +97,10 @@ fun PasswordDialog(
                     label = { Text("Enter your password") },
                     value = passwordText,
                     singleLine = true,
+                    textStyle = TextStyle(
+                        color = Color.Gray,
+                        fontSize = 16.sp
+                    ),
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Outlined.Lock,
