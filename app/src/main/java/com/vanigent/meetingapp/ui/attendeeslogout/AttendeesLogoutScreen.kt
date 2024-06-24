@@ -1,6 +1,7 @@
 package com.vanigent.meetingapp.ui.attendeeslogout
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,14 +16,17 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vanigent.meetingapp.R
@@ -53,6 +57,7 @@ fun AttendeesLogoutScreen(
     Row(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.White)
             .padding(16.dp)
     ) {
 
@@ -129,6 +134,10 @@ fun AttendeesLogoutScreen(
                         label = { Text(stringResource(id = R.string.add_comments)) },
                         value = commentsState.comment,
                         minLines = 4,
+                        textStyle = TextStyle(
+                            color = Color.Gray,
+                            fontSize = 16.sp
+                        ),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                         onValueChange = {
                             viewModel.onCommentsChanged(it)
@@ -140,15 +149,19 @@ fun AttendeesLogoutScreen(
             }
         }
 
-        pdfUploadState.uploadState?.let {
-            if (it) {
-                onUploadSuccess()
-            } else {
-                Toast.makeText(context, "Meeting PDF upload unsuccessful", Toast.LENGTH_SHORT).show()
-            }
-        }
         if (loadingState.loadingState) {
             ProgressIndicator()
+        }
+
+        LaunchedEffect(pdfUploadState.uploadState) {
+            pdfUploadState.uploadState?.let {
+                if (it) {
+                    onUploadSuccess()
+                } else {
+                    Toast.makeText(context, "Meeting PDF upload unsuccessful", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
         }
     }
 

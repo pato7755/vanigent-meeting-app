@@ -177,22 +177,23 @@ class AttendeesLogoutViewModel @Inject constructor(
         )
 
         viewModelScope.launch(Dispatchers.IO) {
-            _meetingState.value.meeting?.let {
-                val generatedPdf = generatePDF(
+            val meetingPdf = _meetingState.value.meeting?.let {
+                generatePDF(
                     context = context,
                     filename = filename,
                     meeting = it,
                     comments = commentsState.value.comment,
                     meetingStatistics = meetingStatistics
                 )
+            }
 
-                generatedPdf?.let { pdf ->
-                    val result = meetingRepository.uploadPDFToServer(pdf)
-                    withContext(Dispatchers.Main) {
-                        _loadingState.update { loading -> loading.copy(loadingState = false) }
-                        _pdfUploadState.update { state ->
-                            state.copy(uploadState = result)
-                        }
+
+            meetingPdf?.let { pdf ->
+                val result = meetingRepository.uploadPDFToServer(pdf)
+                withContext(Dispatchers.Main) {
+                    _loadingState.update { loading -> loading.copy(loadingState = false) }
+                    _pdfUploadState.update { state ->
+                        state.copy(uploadState = result)
                     }
                 }
             }

@@ -63,7 +63,7 @@ object FileUtilities {
         filename: String,
         meeting: Meeting,
         comments: String,
-        meetingStatistics: Map<String, String>,
+        meetingStatistics: Map<String, String>
     ): File? {
 
         try {
